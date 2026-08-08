@@ -36,15 +36,31 @@
     get compteur() { return parseInt(localStorage.getItem("devix_compteur") || "0", 10); },
     set compteur(v) { localStorage.setItem("devix_compteur", String(v)); },
     get devis() { try { return JSON.parse(localStorage.getItem("devix_bibliotheque")) || []; } catch { return []; } },
-    set devis(v) { try { localStorage.setItem("devix_bibliotheque", JSON.stringify(v)); } catch (e) {} },
+    set devis(v) { try { localStorage.setItem("devix_bibliotheque", JSON.stringify(v)); } catch (e) { toast("Mémoire pleine : devis non enregistré. Videz d'anciens devis."); } },
   };
 
-  // Sauvegarde le devis courant dans la bibliothèque (crée ou met à jour par numéro).
+  // Identifiant stable (uuid v4) — l'identité d'un devis, indépendante du numéro d'affichage.
+  function uuid() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+      const r = Math.random() * 16 | 0, v = c === "x" ? r : (r & 0x3 | 0x8); return v.toString(16);
+    });
+  }
+  // Rétro-remplissage : les anciens devis sans id en reçoivent un (une seule fois).
+  (function backfillIds() {
+    const l = store.devis; let changed = false;
+    l.forEach((d) => { if (!d.id) { d.id = uuid(); changed = true; } });
+    if (changed) store.devis = l;
+  })();
+
+  // Sauvegarde le devis courant dans la bibliothèque (crée ou met à jour par id stable).
   function sauverDevis(statut) {
     if (!etat.lignes.length) return;
+    if (!etat.id) etat.id = uuid();
     const t = calculerTotaux(etat.lignes, { tva: etat.tva, remise: etat.remise });
     const num = etat.numero || (store.compteur + 1);
     const snap = {
+      id: etat.id,
       numero: num,
       date: new Date().toISOString(),
       dateStr: new Date().toLocaleDateString("fr-FR"),
@@ -57,15 +73,19 @@
       piece: etat.piece || null,
     };
     const liste = store.devis;
-    const i = liste.findIndex((d) => d.numero === num);
-    if (i >= 0) liste[i] = snap; else liste.unshift(snap);
+    const i = liste.findIndex((d) => d.id === snap.id);
+    if (i >= 0) liste[i] = snap;
+    else { store.compteur = Math.max(store.compteur, num); liste.unshift(snap); } // réserve le numéro dès la 1re sauvegarde
     store.devis = liste;
+    // Sync cloud (si connecté) — sinon reste local (mode essai).
+    if (window.BSAuth && window.BSAuth.isLoggedIn()) window.BSAuth.pushDoc(snap);
   }
 
-  // Recharge un devis stocké dans l'état courant.
-  function reprendreDevis(num) {
-    const d = store.devis.find((x) => x.numero === num);
+  // Recharge un devis stocké dans l'état courant (par id, fallback numéro pour l'existant).
+  function reprendreDevis(idOrNum) {
+    const d = store.devis.find((x) => x.id === idOrNum) || store.devis.find((x) => x.numero === idOrNum);
     if (!d) return;
+    etat.id = d.id || uuid();
     etat.lignes = d.lignes.map((l) => ({ ...l }));
     etat.tva = d.tva; etat.echeancier = d.echeancier;
     etat.signature = d.signature; etat.client = d.client;
@@ -131,10 +151,11 @@
       .map((s) => ligneDevis(s.cle, s.quantite, tarifs))
       .filter(Boolean);
     etat.piece = res.piece;
+    etat.id = uuid();        // identité stable du nouveau devis
     etat.signature = null;   // nouveau devis → signature remise à zéro
     etat.echeancier = null;  // et échéancier réinitialisé au preset par défaut
     etat.client = null;      // et coordonnées client vidées (pas d'héritage du devis précédent)
-    etat.numero = store.compteur + 1;  // numéro figé pour ce devis
+    etat.numero = store.compteur + 1;  // numéro d'affichage prédit (réservé à la 1re sauvegarde)
     etat._exporte = false;
     etat._precisions = res.besoinPrecision || [];
     etat._notes = res.notes || [];
@@ -447,6 +468,14 @@
 
   // Export PDF via l'impression navigateur (iOS/Android : "Enregistrer en PDF" / partager).
   function exportPDF() {
+    // GATE LOGIN : enregistrer/envoyer un devis nécessite un compte (gratuit).
+    // Hors-ligne : on laisse TOUJOURS passer (l'impression est locale, cas chantier).
+    // On sauve d'abord en local pour ne rien perdre pendant la connexion.
+    if (navigator.onLine && window.BSAuth && window.BSAuth.available && !window.BSAuth.isLoggedIn()) {
+      sauverDevis("brouillon");
+      openLogin("send");
+      return;
+    }
     if (!store.profil.nom) {
       toast("Complétez d'abord le nom de votre entreprise.");
       $("btnProfil").click();
@@ -457,8 +486,8 @@
       openClient();
       return;
     }
-    // Consomme le numéro de devis une seule fois (numérotation séquentielle).
-    if (!etat._exporte) { store.compteur = store.compteur + 1; etat._exporte = true; }
+    // Le numéro est réservé par sauverDevis dès la 1re sauvegarde (plus de double comptage).
+    etat._exporte = true;
     sauverDevis("envoyé");
     setTimeout(() => window.print(), 60);
   }
@@ -496,12 +525,26 @@
   function renderBibliotheque() {
     const liste = store.devis;
     const c = $("biblioListe");
-    $("biblioSous").textContent = liste.length
-      ? `${liste.length} devis enregistré(s) sur cet appareil.`
-      : "Vos devis seront enregistrés ici.";
+    const logged = window.BSAuth && window.BSAuth.isLoggedIn();
+    $("biblioSous").textContent = !liste.length
+      ? "Vos devis seront enregistrés ici."
+      : logged
+        ? `${liste.length} devis synchronisé(s) dans votre compte.`
+        : `${liste.length} devis enregistré(s) sur cet appareil.`;
     c.innerHTML = "";
+    // Bannière : en mode essai (non connecté), inviter à sauvegarder en ligne.
+    if (!logged && window.BSAuth && window.BSAuth.available) {
+      const banner = document.createElement("button");
+      banner.className = "cloud-banner";
+      banner.innerHTML = `<span class="cb-ic">🔒</span><span>Vos devis sont sur cet appareil.<br><b>Connectez-vous</b> pour les sauvegarder en ligne — gratuit.</span>`;
+      banner.addEventListener("click", () => openLogin());
+      c.appendChild(banner);
+    }
     if (!liste.length) {
-      c.innerHTML = `<div class="biblio-empty"><div class="big">📄</div>Aucun devis pour l'instant.<br>Créez votre premier devis.<br><button id="biblioNew">+ Nouveau devis</button></div>`;
+      const empty = document.createElement("div");
+      empty.className = "biblio-empty";
+      empty.innerHTML = `<div class="big">📄</div>Aucun devis pour l'instant.<br>Créez votre premier devis.<br><button id="biblioNew">+ Nouveau devis</button>`;
+      c.appendChild(empty);
       $("biblioNew").addEventListener("click", () => goto("saisie"));
       return;
     }
@@ -525,7 +568,7 @@
           <div class="bc-tot">${eur(d.totalTTC || 0)}</div>
           <span class="bc-badge ${badge[st] || "brouillon"}">${esc(st)}</span>
         </div>`;
-      card.addEventListener("click", () => reprendreDevis(d.numero));
+      card.addEventListener("click", () => reprendreDevis(d.id || d.numero));
       c.appendChild(card);
     });
   }
@@ -537,6 +580,7 @@
     $("pfTel").value = p.tel || ""; $("pfEmail").value = p.email || ""; $("pfSiret").value = p.siret || "";
     $("pfTvaIntra").value = p.tvaIntra || ""; $("pfDecennale").value = p.decennale || "";
     $("pfMediateur").value = p.mediateur || "";
+    $("pfComptable").value = p.comptable || "";
     $("pfColor").value = p.couleur || "#0F5132";
     openSheet("sheetProfil");
   });
@@ -548,11 +592,114 @@
       adresse: $("pfAdresse").value, forme: $("pfForme").value,
       tel: $("pfTel").value, email: $("pfEmail").value, siret: $("pfSiret").value,
       tvaIntra: $("pfTvaIntra").value, decennale: $("pfDecennale").value,
-      mediateur: $("pfMediateur").value, couleur: $("pfColor").value,
+      mediateur: $("pfMediateur").value, comptable: $("pfComptable").value.trim(), couleur: $("pfColor").value,
     };
     window.setBrand($("pfColor").value);
+    if (window.BSAuth && window.BSAuth.isLoggedIn()) window.BSAuth.pushProfil();
     closeSheet("sheetProfil"); toast("Profil enregistré ✓");
   });
+
+  // =========================================================
+  // COMPTE / CONNEXION (lien magique)
+  // =========================================================
+  let _loginSent = "";
+  function openLogin(context) { renderLogin(context); openSheet("sheetLogin"); }
+
+  function renderLogin(context) {
+    const body = $("loginBody");
+    const user = window.BSAuth && window.BSAuth.user();
+    if (user) {
+      body.innerHTML = `
+        <h3>Mon compte</h3>
+        <p class="sub">Connecté : <b>${esc(user.email || "")}</b><br>Vos devis sont sauvegardés en ligne et vous les retrouvez sur tous vos appareils.</p>
+        <button class="save" id="lgOut" style="background:#fff;color:var(--brand);border:1.5px solid var(--brand)">Se déconnecter</button>`;
+      $("lgOut").addEventListener("click", () => {
+        window.BSAuth.signOut().then(() => { renderLogin(); toast("Déconnecté."); });
+      });
+      return;
+    }
+    if (_loginSent) {
+      body.innerHTML = `
+        <h3>Vérifiez vos emails</h3>
+        <p class="sub">On a envoyé un lien <b>et un code</b> à <b>${esc(_loginSent)}</b>.<br>Cliquez le lien, ou entrez le code à 6 chiffres ci-dessous (recommandé sur iPhone).</p>
+        <div class="field"><label for="lgCode">Code reçu par email</label><input id="lgCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" style="letter-spacing:6px;font-size:20px;text-align:center"></div>
+        <button class="save" id="lgVerify">Me connecter</button>
+        <div style="display:flex;gap:16px;justify-content:center;margin-top:12px">
+          <button id="lgResend" style="background:none;border:none;color:var(--brand);font:inherit;cursor:pointer;text-decoration:underline">Renvoyer</button>
+          <button id="lgChange" style="background:none;border:none;color:#6B7A8C;font:inherit;cursor:pointer;text-decoration:underline">Changer d'email</button>
+        </div>`;
+      const verify = () => {
+        const code = $("lgCode").value.trim();
+        if (!/^\d{6}$/.test(code)) { $("lgCode").focus(); $("lgCode").style.borderColor = "#E4572E"; return; }
+        const b = $("lgVerify"); b.disabled = true; b.textContent = "Connexion…";
+        window.BSAuth.verifyOtp(_loginSent, code).then(() => {
+          closeSheet("sheetLogin"); _loginSent = ""; toast("Connecté ✓");
+        }).catch(() => { b.disabled = false; b.textContent = "Me connecter"; toast("Code invalide ou expiré."); });
+      };
+      $("lgVerify").addEventListener("click", verify);
+      $("lgCode").addEventListener("keydown", (e) => { if (e.key === "Enter") verify(); });
+      $("lgResend").addEventListener("click", () => {
+        window.BSAuth.sendMagicLink(_loginSent).then(() => toast("Lien renvoyé ✓")).catch(() => toast("Patientez 1 min avant de renvoyer."));
+      });
+      $("lgChange").addEventListener("click", () => { _loginSent = ""; renderLogin(context); });
+      return;
+    }
+    const titre = context === "send" ? "Enregistrez et envoyez votre devis" : "Créez votre compte gratuit";
+    const sousTitre = context === "send"
+      ? "Votre devis est prêt. Créez un compte gratuit pour l'enregistrer en ligne et l'envoyer à votre client — c'est immédiat."
+      : "Un compte gratuit pour sauvegarder vos devis en ligne et les retrouver partout.";
+    body.innerHTML = `
+      <h3>${titre}</h3>
+      <p class="sub">${sousTitre}</p>
+      <div class="field"><label for="lgEmail">Votre email</label><input id="lgEmail" type="email" inputmode="email" autocomplete="email" placeholder="vous@exemple.fr"></div>
+      <button class="save" id="lgSend">Recevoir mon lien de connexion</button>
+      <p class="sub" style="margin-top:10px;font-size:12px">Sans mot de passe : on vous envoie un lien à cliquer. Gratuit, aucune carte demandée.</p>`;
+    const send = () => {
+      const email = $("lgEmail").value.trim();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { $("lgEmail").focus(); $("lgEmail").style.borderColor = "#E4572E"; return; }
+      const btn = $("lgSend"); btn.disabled = true; btn.textContent = "Envoi…";
+      window.BSAuth.sendMagicLink(email).then(() => {
+        _loginSent = email; renderLogin(context);
+      }).catch((e) => {
+        btn.disabled = false; btn.textContent = "Recevoir mon lien de connexion";
+        toast(e && /rate/i.test(e.message || "") ? "Trop d'essais, réessayez dans 1 min." : "Envoi impossible, vérifiez l'email.");
+      });
+    };
+    $("lgSend").addEventListener("click", send);
+    $("lgEmail").addEventListener("keydown", (e) => { if (e.key === "Enter") send(); });
+  }
+
+  function updateAccountBtn(user) {
+    const b = $("btnAccount"); if (!b) return;
+    b.style.color = user ? "var(--brand)" : "";
+    b.title = user ? ("Compte : " + (user.email || "")) : "Mon compte";
+  }
+  $("btnAccount").addEventListener("click", () => openLogin());
+  if (window.BSAuth) window.BSAuth.onChange((user) => { updateAccountBtn(user); if ($("sheetLogin").classList.contains("open")) renderLogin(); });
+
+  // Fusion cloud terminée (après connexion) → rafraîchir la bibliothèque + feedback.
+  window.__onCloudSynced = () => {
+    if (etat.ecran === "biblio") renderBibliotheque();
+    toast("Devis synchronisés ✓");
+  };
+
+  // ---- Partager l'app ----
+  function shareApp() {
+    const url = "https://devis.batispot.pro";
+    const data = {
+      title: "BatiSpot Devis",
+      text: "Je fais mes devis en parlant, en 30 secondes — essaie, c'est gratuit :",
+      url,
+    };
+    if (navigator.share) {
+      navigator.share(data).catch(() => {});
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(data.text + " " + url).then(() => toast("Lien copié — collez-le dans un message."), () => toast(url));
+    } else {
+      toast(url);
+    }
+  }
+  $("btnShare").addEventListener("click", shareApp);
 
   // =========================================================
   // TARIFS PERSO

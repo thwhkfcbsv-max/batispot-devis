@@ -341,3 +341,14 @@ p.sub { color: var(--gris-t); font-size: 15px; margin-bottom: 22px; line-height:
 .wz-check { list-style: none; margin: 6px 0 24px; }
 .wz-check li { display: flex; align-items: center; gap: 12px; padding: 11px 0; font-size: 15.5px; border-bottom: 1px solid rgba(255,255,255,.1); }
 .wz-check .ic { width: 30px; height: 30px; border-radius: 9px; background: rgba(255,194,75,.18); color: var(--jaune); display: grid; place-items: center; font-size: 15px; flex: 0 0 auto; }
+
+/* ---- Bannière connexion (bibliothèque en mode essai) ---- */
+.cloud-banner{
+  display:flex; align-items:center; gap:12px; width:100%; text-align:left;
+  background:color-mix(in srgb, var(--brand) 8%, #fff); border:1.5px solid color-mix(in srgb, var(--brand) 30%, #fff);
+  color:#243B53; border-radius:14px; padding:14px 16px; margin-bottom:14px; cursor:pointer;
+  font-size:14px; line-height:1.35; font-family:inherit;
+}
+.cloud-banner:hover{ background:color-mix(in srgb, var(--brand) 14%, #fff); }
+.cloud-banner .cb-ic{ font-size:22px; flex:none; }
+.cloud-banner b{ color:var(--brand); }
