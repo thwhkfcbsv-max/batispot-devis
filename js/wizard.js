@@ -96,26 +96,33 @@
     // ---- Choix du métier (écran d'accueil) : bascule catalogue/parser (via profil) + démo ----
     const DEMO = {
       peinture:
+        '<div class="pv-grp">Peinture</div>' +
         '<div class="pv-line"><span>Peinture murs (2 couches)</span><span>812,00 &euro;</span></div>' +
         '<div class="pv-line"><span>Peinture plafond (2 couches)</span><span>384,00 &euro;</span></div>' +
+        '<div class="pv-grp">Pr&eacute;paration</div>' +
         '<div class="pv-line"><span>Rebouchage &amp; pr&eacute;paration</span><span>180,00 &euro;</span></div>' +
         '<div class="pv-line"><span>Sous-couche d\'accrochage</span><span>203,00 &euro;</span></div>' +
+        '<div class="pv-grp">Chantier</div>' +
         '<div class="pv-line"><span>Protection &amp; installation</span><span>80,00 &euro;</span></div>' +
         '<div class="pv-line" style="opacity:.55"><span>Sous-total HT</span><span>1 659,00 &euro;</span></div>' +
         '<div class="pv-line" style="opacity:.55"><span>TVA 10 %</span><span>165,90 &euro;</span></div>' +
         '<div class="pv-ttc"><span>Total TTC</span><span class="v">1 824,90 &euro;</span></div>',
       plomberie:
+        '<div class="pv-grp">Salle de bain</div>' +
         '<div class="pv-line"><span>Pose douche + receveur</span><span>250,00 &euro;</span></div>' +
         '<div class="pv-line"><span>Mitigeur thermostatique</span><span>280,00 &euro;</span></div>' +
         '<div class="pv-line"><span>Pose WC</span><span>180,00 &euro;</span></div>' +
+        '<div class="pv-grp">Divers</div>' +
         '<div class="pv-line"><span>D&eacute;pose ancien appareil</span><span>60,00 &euro;</span></div>' +
         '<div class="pv-line"><span>D&eacute;placement</span><span>45,00 &euro;</span></div>' +
         '<div class="pv-line" style="opacity:.55"><span>Sous-total HT</span><span>815,00 &euro;</span></div>' +
         '<div class="pv-line" style="opacity:.55"><span>TVA 10 %</span><span>81,50 &euro;</span></div>' +
         '<div class="pv-ttc"><span>Total TTC</span><span class="v">896,50 &euro;</span></div>',
       mixte:
+        '<div class="pv-grp">Peinture</div>' +
         '<div class="pv-line"><span>Peinture murs (2 couches)</span><span>812,00 &euro;</span></div>' +
         '<div class="pv-line"><span>Peinture plafond (2 couches)</span><span>384,00 &euro;</span></div>' +
+        '<div class="pv-grp">Plomberie</div>' +
         '<div class="pv-line"><span>Pose WC</span><span>180,00 &euro;</span></div>' +
         '<div class="pv-line"><span>Mitigeur thermostatique</span><span>280,00 &euro;</span></div>' +
         '<div class="pv-line" style="opacity:.55"><span>Sous-total HT</span><span>1 656,00 &euro;</span></div>' +
@@ -130,9 +137,6 @@
     function renderDemo() {
       const el = $("pvLines1");
       if (el) el.innerHTML = DEMO[demoKey()] || DEMO.peinture;
-      const sub = document.querySelector("#wzPreview1 .pv-sub");
-      const k = demoKey();
-      if (sub) sub.textContent = k === "mixte" ? "Devis multi-métiers" : (k === "plomberie" ? "Devis plomberie" : "Devis DEV-0001");
     }
     const metierBtns = document.querySelectorAll(".wz-metier-btn");
     function markMetier() {
