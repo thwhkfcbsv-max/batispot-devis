@@ -1,6 +1,6 @@
 /* Service worker — RÉSEAU D'ABORD (fini le "vieille version en cache").
    On sert toujours le frais quand il y a du réseau ; le cache ne sert QUE de repli hors-ligne. */
-const CACHE = "devix-v27";
+const CACHE = "devix-v28";
 const ASSETS = [
   "index.html",
   "css/app.css",
@@ -9,8 +9,10 @@ const ASSETS = [
   "js/track.js",
   "js/pricing-peinture.js",
   "js/pricing-plomberie.js",
+  "js/pricing-electricite.js",
   "js/parser.js",
   "js/parser-plomberie.js",
+  "js/parser-electricite.js",
   "js/signature.js",
   "js/wizard.js",
   "js/app.js",

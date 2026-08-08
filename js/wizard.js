@@ -128,11 +128,22 @@
         '<div class="pv-line" style="opacity:.55"><span>Sous-total HT</span><span>1 656,00 &euro;</span></div>' +
         '<div class="pv-line" style="opacity:.55"><span>TVA 10 %</span><span>165,60 &euro;</span></div>' +
         '<div class="pv-ttc"><span>Total TTC</span><span class="v">1 821,60 &euro;</span></div>',
+      electricite:
+        '<div class="pv-grp">Tableau</div>' +
+        '<div class="pv-line"><span>Remplacement tableau &eacute;lectrique</span><span>650,00 &euro;</span></div>' +
+        '<div class="pv-line"><span>Ajout disjoncteur / diff&eacute;rentiel</span><span>90,00 &euro;</span></div>' +
+        '<div class="pv-grp">&Eacute;clairage &amp; prises</div>' +
+        '<div class="pv-line"><span>Pose spots encastr&eacute;s</span><span>360,00 &euro;</span></div>' +
+        '<div class="pv-line"><span>Pose / remplacement prise</span><span>270,00 &euro;</span></div>' +
+        '<div class="pv-line"><span>D&eacute;placement</span><span>45,00 &euro;</span></div>' +
+        '<div class="pv-line" style="opacity:.55"><span>Sous-total HT</span><span>1 415,00 &euro;</span></div>' +
+        '<div class="pv-line" style="opacity:.55"><span>TVA 10 %</span><span>141,50 &euro;</span></div>' +
+        '<div class="pv-ttc"><span>Total TTC</span><span class="v">1 556,50 &euro;</span></div>',
     };
     function demoKey() {
-      const p = data.metiers.includes("peinture"), pl = data.metiers.includes("plomberie");
-      if (p && pl) return "mixte";
-      return pl ? "plomberie" : "peinture";
+      const m = data.metiers;
+      if (m.length > 1) return "mixte";
+      return m[0] || "peinture";
     }
     function renderDemo() {
       const el = $("pvLines1");

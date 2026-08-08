@@ -57,7 +57,7 @@
   function metiersActifs() {
     const p = store.profil;
     let arr = Array.isArray(p.metiers) ? p.metiers : (p.metier ? [p.metier] : ["peinture"]);
-    arr = arr.filter((m) => m === "peinture" || m === "plomberie");
+    arr = arr.filter((m) => m === "peinture" || m === "plomberie" || m === "electricite");
     return arr.length ? arr : ["peinture"];
   }
   function metierActif() { return metiersActifs()[0]; } // compat : 1er métier
@@ -65,6 +65,7 @@
     const ms = metiersActifs(), cat = {};
     if (ms.includes("peinture")) Object.assign(cat, window.CATALOGUE_PEINTURE);
     if (ms.includes("plomberie")) Object.assign(cat, window.CATALOGUE_PLOMBERIE);
+    if (ms.includes("electricite")) Object.assign(cat, window.CATALOGUE_ELECTRICITE);
     return cat;
   }
   function appliquerMetier() { setCatalogue(catalogueActif()); }
@@ -80,6 +81,12 @@
       ["Chauffe-eau", "Remplacer le chauffe-eau et le mitigeur de l'évier."],
       ["2 radiateurs", "Poser 2 radiateurs avec raccordement."],
       ["Fuite", "Recherche de fuite et débouchage d'une canalisation."],
+    ],
+    electricite: [
+      ["Tableau électrique", "Remplacer le tableau électrique et ajouter 2 disjoncteurs."],
+      ["Prises + interrupteurs", "Poser 5 prises et 3 interrupteurs."],
+      ["Spots", "Poser 6 spots encastrés au plafond du salon."],
+      ["Borne de recharge", "Installer une borne de recharge pour voiture électrique."],
     ],
   };
   function renderChips() {
@@ -185,6 +192,11 @@
     }
     if (ms.includes("plomberie")) {
       const r = window.parserDevisPlomberie(saisie);
+      sugg = sugg.concat(r.suggestions || []); piece = piece || r.piece;
+      besoin = besoin.concat(r.besoinPrecision || []); notes = notes.concat(r.notes || []);
+    }
+    if (ms.includes("electricite")) {
+      const r = window.parserDevisElectricite(saisie);
       sugg = sugg.concat(r.suggestions || []); piece = piece || r.piece;
       besoin = besoin.concat(r.besoinPrecision || []); notes = notes.concat(r.notes || []);
     }
@@ -640,6 +652,7 @@
     const _ms = metiersActifs();
     $("pfMetierPeinture").checked = _ms.includes("peinture");
     $("pfMetierPlomberie").checked = _ms.includes("plomberie");
+    $("pfMetierElectricite").checked = _ms.includes("electricite");
     openSheet("sheetProfil");
   });
   $("pfSave").addEventListener("click", () => {
@@ -651,7 +664,7 @@
       tel: $("pfTel").value, email: $("pfEmail").value, siret: $("pfSiret").value,
       tvaIntra: $("pfTvaIntra").value, decennale: $("pfDecennale").value,
       mediateur: $("pfMediateur").value, comptable: $("pfComptable").value.trim(), couleur: $("pfColor").value,
-      metiers: (function () { const a = []; if ($("pfMetierPeinture").checked) a.push("peinture"); if ($("pfMetierPlomberie").checked) a.push("plomberie"); return a.length ? a : ["peinture"]; })(),
+      metiers: (function () { const a = []; if ($("pfMetierPeinture").checked) a.push("peinture"); if ($("pfMetierPlomberie").checked) a.push("plomberie"); if ($("pfMetierElectricite").checked) a.push("electricite"); return a.length ? a : ["peinture"]; })(),
     };
     window.setBrand($("pfColor").value);
     appliquerMetier(); renderChips();
