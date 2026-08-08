@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0F5132">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>BatiSpot Devis — vos devis en parlant</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<!-- =========== WIZARD ONBOARDING (1er lancement) =========== -->
+<div class="wizard" id="wizard">
+  <div class="wz-progress">
+    <div class="dot on"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  </div>
+  <div class="wz-body">
+
+    <!-- Étape 1 : Bienvenue -->
+    <div class="wz-step on" data-step="0">
+      <div class="wz-kicker">BatiSpot · Devis</div>
+      <div class="wz-title">Vos devis, dictés en 30 secondes.</div>
+      <div class="wz-sub">Décrivez le chantier à voix haute — on le transforme en devis pro, chiffré, à vos couleurs. Prêt à envoyer au client.</div>
+      <div class="wz-preview" id="wzPreview1">
+        <div class="pv-band"></div>
+        <div class="pv-in">
+          <div class="pv-head">
+            <div class="pv-logo" id="pvLogo1">B</div>
+            <div><div class="pv-soc" id="pvSoc1">Votre entreprise</div><div class="pv-sub">Devis DEV-0001</div></div>
+          </div>
+          <div class="pv-line"><span>Peinture murs (2 couches)</span><span>812,00 €</span></div>
+          <div class="pv-line"><span>Peinture plafond</span><span>384,00 €</span></div>
+          <div class="pv-ttc"><span>Total TTC</span><span class="v">1 779,80 €</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Étape 2 : Entreprise -->
+    <div class="wz-step" data-step="1">
+      <div class="wz-kicker">Étape 1 / 3</div>
+      <div class="wz-title">Votre entreprise</div>
+      <div class="wz-sub">Ces informations apparaissent en haut de chaque devis.</div>
+      <div class="wz-field"><label>Nom de l'entreprise *</label><input id="wzNom" placeholder="Ex : Peinture Diaby" autocomplete="organization"></div>
+      <div class="wz-field"><label>Votre nom</label><input id="wzContact" placeholder="Ex : Moctar Diaby" autocomplete="name"></div>
+      <div class="wz-field"><label>Téléphone</label><input id="wzTel" type="tel" placeholder="06 12 34 56 78" autocomplete="tel"></div>
+      <div class="wz-field"><label>Email</label><input id="wzEmail" type="email" placeholder="contact@..." autocomplete="email"></div>
+      <div class="wz-field"><label>SIRET</label><input id="wzSiret" inputmode="numeric" placeholder="123 456 789 00012"></div>
+    </div>
+
+    <!-- Étape 3 : Couleur & logo -->
+    <div class="wz-step" data-step="2">
+      <div class="wz-kicker">Étape 2 / 3</div>
+      <div class="wz-title">Vos couleurs</div>
+      <div class="wz-sub">Choisissez la couleur de votre marque — elle habille tous vos devis.</div>
+      <div class="swatches" id="swatches"></div>
+      <div class="custom-color">
+        <input type="color" id="wzColor" value="#0F5132">
+        <span>Ou choisissez une couleur précise</span>
+      </div>
+      <div class="logo-upload">
+        <div class="prev" id="wzLogoPrev">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="opacity:.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-4.5-4.5L5 21"/></svg>
+        </div>
+        <button id="wzLogoBtn">Ajouter mon logo</button>
+        <input type="file" id="wzLogoFile" accept="image/*" hidden>
+      </div>
+      <div class="wz-preview" id="wzPreview2">
+        <div class="pv-band"></div>
+        <div class="pv-in">
+          <div class="pv-head">
+            <div class="pv-logo" id="pvLogo2">B</div>
+            <div><div class="pv-soc" id="pvSoc2">Votre entreprise</div><div class="pv-sub">Aperçu de votre devis</div></div>
+          </div>
+          <div class="pv-line"><span>Peinture murs (2 couches)</span><span>812,00 €</span></div>
+          <div class="pv-ttc"><span>Total TTC</span><span class="v">1 779,80 €</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Étape 4 : Prêt -->
+    <div class="wz-step" data-step="3">
+      <div class="wz-kicker">Étape 3 / 3</div>
+      <div class="wz-title">Tout est prêt, <span id="wzHi">l'artisan</span> !</div>
+      <div class="wz-sub">Votre compte est configuré. Voici ce que vous pouvez faire :</div>
+      <ul class="wz-check">
+        <li><span class="ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg></span> Dicter un chantier, devis automatique</li>
+        <li><span class="ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span> Ajuster chaque prix à vos tarifs</li>
+        <li><span class="ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2C6.5 2 2 6 2 11a5 5 0 0 0 5 5h2a2 2 0 0 1 2 2 2 2 0 0 0 2 2c5.5 0 10-4 10-9S17.5 2 12 2Z"/></svg></span> Devis à vos couleurs, avec votre logo</li>
+        <li><span class="ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span> Envoyer au client en un clic</li>
+      </ul>
+    </div>
+
+  </div>
+  <div class="wz-foot">
+    <button class="wz-back hidden" id="wzBack">←</button>
+    <button class="wz-next" id="wzNext">Commencer</button>
+  </div>
+</div>
+
+<!-- =========== APP =========== -->
+<div class="app" id="appRoot" style="display:none">
+
+  <div class="topbar">
+    <a href="#" class="brand-logo" aria-label="BatiSpot Devis">
+      <svg width="150" height="34" viewBox="0 0 200 48" xmlns="http://www.w3.org/2000/svg">
+        <defs><linearGradient id="bslg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#228B5B"/><stop offset="100%" stop-color="#4CAF82"/>
+        </linearGradient></defs>
+        <rect width="40" height="40" rx="10" y="4" fill="url(#bslg)"/>
+        <path d="M20 12 L10 20 L10 32 L30 32 L30 20 Z" fill="none" stroke="white" stroke-width="2" stroke-linejoin="round"/>
+        <rect x="17" y="24" width="6" height="8" rx="1" fill="white" opacity="0.9"/>
+        <text x="50" y="32" font-family="Inter,system-ui,sans-serif" font-weight="900" font-size="26" fill="#1A6B45" letter-spacing="-0.5">Bati<tspan fill="#4CAF82">Spot</tspan></text>
+      </svg>
+    </a>
+    <span class="brand-tag">Devis</span>
+    <div class="spacer"></div>
+    <button class="icon-btn" id="btnBiblio" title="Mes devis">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h11a2 2 0 0 1 2 2v14l-4-2-4 2V6a2 2 0 0 0-2-2H4z"/><path d="M20 4v14"/></svg>
+    </button>
+    <button class="icon-btn" id="btnTarifs" title="Mes tarifs" style="font-family:var(--ff-disp);font-weight:800;font-size:20px">€</button>
+    <button class="icon-btn" id="btnProfil" title="Réglages">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+
+  <!-- Écran saisie -->
+  <div class="screen" id="screenSaisie">
+    <div class="eyebrow">Nouveau devis</div>
+    <h2 class="title">Décrivez le chantier</h2>
+    <p class="sub">Parlez ou écrivez en quelques mots — on transforme ça en devis.</p>
+
+    <div class="dictee">
+      <textarea id="txtSaisie" aria-label="Description du chantier" placeholder="Ex : Repeindre une chambre de 12 m², murs et plafond, avec rebouchage des fissures et 2 portes."></textarea>
+      <div class="dictee-actions">
+        <button class="mic-btn" id="btnMic" title="Dicter">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+        </button>
+        <span class="mic-hint" id="micHint">Touchez le micro pour dicter</span>
+        <button class="btn-generer" id="btnGenerer" disabled>Générer →</button>
+      </div>
+    </div>
+
+    <div class="chips-label">Ou partez d'un exemple :</div>
+    <div class="chips" id="chips">
+      <span class="chip" data-ex="Repeindre un salon de 24 m², murs et plafond, avec sous-couche et protection.">Salon 24 m²</span>
+      <span class="chip" data-ex="Chambre de 12 m², murs seulement, rebouchage et 1 porte.">Chambre + porte</span>
+      <span class="chip" data-ex="Décoller le papier peint d'une pièce de 15 m² puis peindre murs et plafond.">Papier peint</span>
+      <span class="chip" data-ex="Cage d'escalier, enduit de lissage complet sur 20 m² de murs puis 2 couches.">Enduit + peinture</span>
+    </div>
+  </div>
+
+  <!-- Écran devis -->
+  <div class="screen hidden" id="screenDevis">
+    <div class="eyebrow" id="devisEyebrow">Devis en cours</div>
+    <h2 class="title" id="devisTitre">Votre devis</h2>
+    <p class="sub" id="devisSousTitre"></p>
+    <div id="precisions"></div>
+    <div class="devis-card" id="lignesContainer"></div>
+    <button class="add-ligne" id="btnAddLigne">+ Ajouter une prestation</button>
+    <div class="totaux" id="totaux"></div>
+    <div class="ech-card" id="echeancierCard"></div>
+  </div>
+
+  <!-- Écran aperçu -->
+  <div class="screen hidden" id="screenApercu">
+    <div class="eyebrow">Aperçu</div>
+    <h2 class="title">Votre devis</h2>
+    <p class="sub">Voici ce que votre client recevra.</p>
+    <div class="apercu" id="apercuContent"></div>
+  </div>
+
+  <!-- Écran bibliothèque : mes devis -->
+  <div class="screen hidden" id="screenBiblio">
+    <div class="eyebrow">Bibliothèque</div>
+    <h2 class="title">Mes devis</h2>
+    <p class="sub" id="biblioSous">Tous vos devis, enregistrés sur cet appareil.</p>
+    <div id="biblioListe"></div>
+  </div>
+
+  <div class="bottombar hidden" id="bottombar">
+    <button class="btn-ghost" id="btnRetour">←</button>
+    <button class="btn-primary" id="btnAction">Aperçu du devis</button>
+  </div>
+
+</div>
+
+<!-- Sheet profil -->
+<div class="sheet" id="sheetProfil">
+  <div class="sheet-inner">
+    <div class="sheet-grab"></div>
+    <h3>Mon entreprise</h3>
+    <p class="sub">Ces infos apparaissent en haut de vos devis. Les mentions légales sont obligatoires.</p>
+    <div class="field"><label for="pfNom">Nom de l'entreprise</label><input id="pfNom" placeholder="Ex : Peinture Diaby"></div>
+    <div class="field"><label for="pfContact">Votre nom</label><input id="pfContact" placeholder="Ex : Moctar Diaby"></div>
+    <div class="field"><label for="pfAdresse">Adresse de l'entreprise</label><input id="pfAdresse" placeholder="12 rue des Lilas, 75011 Paris"></div>
+    <div class="field"><label for="pfForme">Forme juridique</label><input id="pfForme" placeholder="Ex : EI, SARL au capital de 5 000 €, RCS Paris 123…"></div>
+    <div class="field"><label for="pfTel">Téléphone</label><input id="pfTel" type="tel" placeholder="06 ..."></div>
+    <div class="field"><label for="pfEmail">Email</label><input id="pfEmail" type="email" placeholder="contact@..."></div>
+    <div class="field"><label for="pfSiret">SIRET</label><input id="pfSiret" inputmode="numeric" placeholder="123 456 789 00012"></div>
+    <div class="field"><label for="pfTvaIntra">N° TVA intracommunautaire (si assujetti)</label><input id="pfTvaIntra" placeholder="FR 12 345678901"></div>
+    <div class="field"><label for="pfDecennale">Assurance décennale (assureur + n° + couverture géo.)</label><input id="pfDecennale" placeholder="Ex : AXA n°… — France métropolitaine"></div>
+    <div class="field"><label for="pfMediateur">Médiateur de la consommation (nom + site)</label><input id="pfMediateur" placeholder="Ex : CM2C — cm2c.net"></div>
+    <div class="field"><label for="pfColor">Couleur de ma marque</label><input type="color" id="pfColor" style="height:52px"></div>
+    <button class="save" id="pfSave">Enregistrer</button>
+  </div>
+</div>
+
+<!-- Sheet client -->
+<div class="sheet" id="sheetClient">
+  <div class="sheet-inner">
+    <div class="sheet-grab"></div>
+    <h3>Coordonnées du client</h3>
+    <p class="sub">Obligatoires sur le devis. Le nom et l'adresse du chantier.</p>
+    <div class="field"><label for="clNom">Nom du client</label><input id="clNom" placeholder="Ex : M. et Mme Martin"></div>
+    <div class="field"><label for="clAdresse">Adresse du chantier</label><input id="clAdresse" placeholder="8 av. de la République, 75011 Paris"></div>
+    <div class="field"><label for="clDebut">Début des travaux (prévu)</label><input id="clDebut" placeholder="Ex : à convenir / sept. 2026"></div>
+    <div class="field"><label for="clDuree">Durée estimée</label><input id="clDuree" placeholder="Ex : 5 jours"></div>
+    <button class="save" id="clSave">Enregistrer</button>
+  </div>
+</div>
+
+<!-- Sheet tarifs -->
+<div class="sheet" id="sheetTarifs">
+  <div class="sheet-inner">
+    <div class="sheet-grab"></div>
+    <h3>Mes tarifs</h3>
+    <p class="sub">Le prix marché est proposé par défaut. Ajustez avec <b>vos</b> prix — ils seront réutilisés.</p>
+    <div id="tarifsList"></div>
+    <button class="save" id="tfSave">Enregistrer mes tarifs</button>
+  </div>
+</div>
+
+<!-- Sheet ajout prestation -->
+<div class="sheet" id="sheetAdd">
+  <div class="sheet-inner">
+    <div class="sheet-grab"></div>
+    <h3>Ajouter une prestation</h3>
+    <div id="addList"></div>
+  </div>
+</div>
+
+<!-- Sheet signature électronique -->
+<div class="sheet" id="sheetSign">
+  <div class="sheet-inner">
+    <div class="sheet-grab"></div>
+    <h3>Signature du client</h3>
+    <p class="sub">Faites signer votre client directement à l'écran, avec le doigt. Le devis vaut « bon pour accord ».</p>
+    <div class="sign-pad-wrap">
+      <canvas id="signCanvas" class="sign-pad"></canvas>
+      <span class="sign-ph" id="signPh">Signez ici</span>
+    </div>
+    <div class="sign-actions">
+      <button class="sign-clear" id="signClear">Effacer</button>
+      <button class="sign-valid" id="signValid">Valider la signature</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/pricing-peinture.js"></script>
+<script src="js/parser.js"></script>
+<script src="js/signature.js"></script>
+<script src="js/wizard.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
