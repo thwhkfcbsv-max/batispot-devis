@@ -53,6 +53,34 @@
     if (changed) store.devis = l;
   })();
 
+  // ---- Métier actif (peinture par défaut) : route catalogue + parser + exemples ----
+  function metierActif() { return store.profil.metier === "plomberie" ? "plomberie" : "peinture"; }
+  function catalogueActif() { return metierActif() === "plomberie" ? window.CATALOGUE_PLOMBERIE : window.CATALOGUE_PEINTURE; }
+  function appliquerMetier() { setCatalogue(catalogueActif()); }
+  const CHIPS_METIER = {
+    peinture: [
+      ["Salon 24 m²", "Repeindre un salon de 24 m², murs et plafond, avec sous-couche et protection."],
+      ["Chambre + porte", "Chambre de 12 m², murs seulement, rebouchage et 1 porte."],
+      ["Papier peint", "Décoller le papier peint d'une pièce de 15 m² puis peindre murs et plafond."],
+      ["Enduit + peinture", "Cage d'escalier, enduit de lissage complet sur 20 m² de murs puis 2 couches."],
+    ],
+    plomberie: [
+      ["Remplacer un WC", "Déposer l'ancien WC et poser un WC neuf."],
+      ["Chauffe-eau", "Remplacer le chauffe-eau et le mitigeur de l'évier."],
+      ["2 radiateurs", "Poser 2 radiateurs avec raccordement."],
+      ["Fuite", "Recherche de fuite et débouchage d'une canalisation."],
+    ],
+  };
+  function renderChips() {
+    const c = document.getElementById("chips"); if (!c) return;
+    c.innerHTML = "";
+    (CHIPS_METIER[metierActif()] || []).forEach((pair) => {
+      const s = document.createElement("span"); s.className = "chip"; s.textContent = pair[0]; s.dataset.ex = pair[1];
+      s.addEventListener("click", () => { const t = document.getElementById("txtSaisie"); t.value = s.dataset.ex; t.dispatchEvent(new Event("input")); t.focus(); });
+      c.appendChild(s);
+    });
+  }
+
   // Sauvegarde le devis courant dans la bibliothèque (crée ou met à jour par id stable).
   function sauverDevis(statut) {
     if (!etat.lignes.length) return;
@@ -136,7 +164,9 @@
 
     // >>> ICI, plus tard : appel LLM (Claude) au lieu du parser local.
     //     Le parser renvoie déjà le bon format → le branchement sera transparent.
-    const res = parserDevis(saisie, { estimerSurfaceMurs, ligneDevis });
+    const res = metierActif() === "plomberie"
+      ? window.parserDevisPlomberie(saisie)
+      : parserDevis(saisie, { estimerSurfaceMurs, ligneDevis });
 
     if (!res.suggestions.length) {
       window.BSTrack && window.BSTrack("blocage", { ou: "generation_vide", saisie: saisie.slice(0, 120) });
@@ -338,7 +368,7 @@
   // ---- Ajout de prestation ----
   $("btnAddLigne").addEventListener("click", () => {
     const list = $("addList"); list.innerHTML = "";
-    Object.entries(CATALOGUE_PEINTURE).forEach(([cle, it]) => {
+    Object.entries(catalogueActif()).forEach(([cle, it]) => {
       const b = document.createElement("button");
       b.className = "add-ligne"; b.style.textAlign = "left"; b.style.marginBottom = "8px";
       b.innerHTML = `<b>${it.label}</b><br><span style="font-size:12px;color:#6B7A8C">${it.prixRef} €/${it.unite} · ${it.aide}</span>`;
@@ -580,6 +610,7 @@
     $("pfMediateur").value = p.mediateur || "";
     $("pfComptable").value = p.comptable || "";
     $("pfColor").value = p.couleur || "#0F5132";
+    $("pfMetier").value = p.metier || "peinture";
     openSheet("sheetProfil");
   });
   $("pfSave").addEventListener("click", () => {
@@ -591,8 +622,10 @@
       tel: $("pfTel").value, email: $("pfEmail").value, siret: $("pfSiret").value,
       tvaIntra: $("pfTvaIntra").value, decennale: $("pfDecennale").value,
       mediateur: $("pfMediateur").value, comptable: $("pfComptable").value.trim(), couleur: $("pfColor").value,
+      metier: $("pfMetier").value,
     };
     window.setBrand($("pfColor").value);
+    appliquerMetier(); renderChips();
     if (window.BSAuth && window.BSAuth.isLoggedIn()) window.BSAuth.pushProfil();
     closeSheet("sheetProfil"); toast("Profil enregistré ✓");
   });
@@ -776,6 +809,7 @@
   window.__afterOnboard = () => goto("saisie");
 
   // Démarrage
+  appliquerMetier(); renderChips();
   window.BSTrack && window.BSTrack("app_open");
   goto("saisie");
 })();

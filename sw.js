@@ -1,5 +1,5 @@
 /* Service worker minimal — cache app shell pour usage hors-ligne (chantier sans réseau). */
-const CACHE = "devix-v11";
+const CACHE = "devix-v12";
 const ASSETS = [
   "index.html",
   "css/app.css",
@@ -7,7 +7,9 @@ const ASSETS = [
   "js/auth.js",
   "js/track.js",
   "js/pricing-peinture.js",
+  "js/pricing-plomberie.js",
   "js/parser.js",
+  "js/parser-plomberie.js",
   "js/signature.js",
   "js/wizard.js",
   "js/app.js",
