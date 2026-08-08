@@ -72,7 +72,9 @@ function num(x) {
  * @returns {object} ligne { cle, label, unite, quantite, prixUnitaire, total, source }
  */
 function ligneDevis(cle, quantite, tarifsPerso = {}) {
-  const item = CATALOGUE_PEINTURE[cle];
+  // Utilise le catalogue ACTIF (fusionné multi-métier via setCatalogue) ; repli sur peinture.
+  const CAT = (typeof window !== "undefined" && window.__CAT_ACTIF) ? window.__CAT_ACTIF : CATALOGUE_PEINTURE;
+  const item = CAT[cle] || CATALOGUE_PEINTURE[cle];
   if (!item) return null;
   const prixPerso = tarifsPerso[cle];
   // prix : perso si fourni (borné >= 0, virgule FR acceptée), sinon prix marché

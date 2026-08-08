@@ -180,7 +180,7 @@ function CATALOGUE_LABEL(cle) {
   if (_CAT && _CAT[cle]) return _CAT[cle].label;
   return cle;
 }
-function setCatalogue(cat) { _CAT = cat; }
+function setCatalogue(cat) { _CAT = cat; if (typeof window !== "undefined") window.__CAT_ACTIF = cat; }
 
 if (typeof module !== "undefined" && module.exports) {
   module.exports = { parserDevis, extraireSurfaces, extraireNombre, setCatalogue };
