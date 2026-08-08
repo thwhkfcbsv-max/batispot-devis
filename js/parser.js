@@ -14,7 +14,7 @@
 const REGLES = [
   { cles: ["mur", "murs"],                         action: "peinture_mur" },
   { cles: ["plafond", "plafonds"],                 action: "peinture_plafond" },
-  { cles: ["porte", "portes", "boiserie", "boiseries"], action: "peinture_boiserie", parQuantite: true },
+  { cles: ["porte", "portes", "boiserie", "boiseries", "fenetre", "fenetres", "fenêtre", "fenêtres", "volet", "volets"], action: "peinture_boiserie", parQuantite: true },
   { cles: ["plinthe", "plinthes"],                 action: "peinture_plinthes" },
   { cles: ["reboucher", "rebouchage", "fissure", "fissures", "trou", "trous"], action: "prepa_rebouchage" },
   { cles: ["enduit", "lissage", "lisser"],         action: "prepa_enduit" },
@@ -50,6 +50,15 @@ function extraireNombre(txt, motCle) {
   const m = txt.match(re);
   if (!m) return 1;
   return chiffres[m[1].toLowerCase()] || parseInt(m[1], 10) || 1;
+}
+
+/** Compte les éléments boisés cités (portes + fenêtres + volets) et somme leurs quantités. */
+function compterBoiseries(txt) {
+  let total = 0, trouve = false;
+  ["porte", "fenetre", "fenêtre", "volet"].forEach((mot) => {
+    if (txt.includes(mot)) { trouve = true; total += extraireNombre(txt, mot); }
+  });
+  return trouve ? total : 1;
 }
 
 /**
@@ -128,7 +137,7 @@ function parserDevis(texteBrut, { estimerSurfaceMurs, ligneDevis }) {
         if (!surfacePlafond) besoinPrecision.push("Quelle surface de plafond ?");
         break;
       case "peinture_boiserie":
-        quantite = extraireNombre(txt, "porte");
+        quantite = compterBoiseries(txt);
         break;
       case "peinture_plinthes":
         quantite = surfaceSol ? Math.round(4 * Math.sqrt(surfaceSol)) : 0; // périmètre

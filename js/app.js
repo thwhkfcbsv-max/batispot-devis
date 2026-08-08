@@ -468,14 +468,8 @@
 
   // Export PDF via l'impression navigateur (iOS/Android : "Enregistrer en PDF" / partager).
   function exportPDF() {
-    // GATE LOGIN : enregistrer/envoyer un devis nécessite un compte (gratuit).
-    // Hors-ligne : on laisse TOUJOURS passer (l'impression est locale, cas chantier).
-    // On sauve d'abord en local pour ne rien perdre pendant la connexion.
-    if (navigator.onLine && window.BSAuth && window.BSAuth.available && !window.BSAuth.isLoggedIn()) {
-      sauverDevis("brouillon");
-      openLogin("send");
-      return;
-    }
+    // Bêta : login OPTIONNEL. L'artisan obtient son PDF sans compte (essai gratuit sans friction).
+    // Le compte reste proposé (bouton « Mon compte » + bannière bibliothèque) pour la sauvegarde cloud.
     if (!store.profil.nom) {
       toast("Complétez d'abord le nom de votre entreprise.");
       $("btnProfil").click();
