@@ -53,9 +53,20 @@
     if (changed) store.devis = l;
   })();
 
-  // ---- Métier actif (peinture par défaut) : route catalogue + parser + exemples ----
-  function metierActif() { return store.profil.metier === "plomberie" ? "plomberie" : "peinture"; }
-  function catalogueActif() { return metierActif() === "plomberie" ? window.CATALOGUE_PLOMBERIE : window.CATALOGUE_PEINTURE; }
+  // ---- Métiers actifs (MULTI : peinture et/ou plomberie) : catalogue + parser + exemples fusionnés ----
+  function metiersActifs() {
+    const p = store.profil;
+    let arr = Array.isArray(p.metiers) ? p.metiers : (p.metier ? [p.metier] : ["peinture"]);
+    arr = arr.filter((m) => m === "peinture" || m === "plomberie");
+    return arr.length ? arr : ["peinture"];
+  }
+  function metierActif() { return metiersActifs()[0]; } // compat : 1er métier
+  function catalogueActif() {
+    const ms = metiersActifs(), cat = {};
+    if (ms.includes("peinture")) Object.assign(cat, window.CATALOGUE_PEINTURE);
+    if (ms.includes("plomberie")) Object.assign(cat, window.CATALOGUE_PLOMBERIE);
+    return cat;
+  }
   function appliquerMetier() { setCatalogue(catalogueActif()); }
   const CHIPS_METIER = {
     peinture: [
@@ -74,7 +85,7 @@
   function renderChips() {
     const c = document.getElementById("chips"); if (!c) return;
     c.innerHTML = "";
-    (CHIPS_METIER[metierActif()] || []).forEach((pair) => {
+    metiersActifs().flatMap((m) => CHIPS_METIER[m] || []).slice(0, 4).forEach((pair) => {
       const s = document.createElement("span"); s.className = "chip"; s.textContent = pair[0]; s.dataset.ex = pair[1];
       s.addEventListener("click", () => { const t = document.getElementById("txtSaisie"); t.value = s.dataset.ex; t.dispatchEvent(new Event("input")); t.focus(); });
       c.appendChild(s);
@@ -164,9 +175,22 @@
 
     // >>> ICI, plus tard : appel LLM (Claude) au lieu du parser local.
     //     Le parser renvoie déjà le bon format → le branchement sera transparent.
-    const res = metierActif() === "plomberie"
-      ? window.parserDevisPlomberie(saisie)
-      : parserDevis(saisie, { estimerSurfaceMurs, ligneDevis });
+    // MULTI-métier : on lance chaque parser sélectionné et on unit les prestations reconnues.
+    const ms = metiersActifs();
+    let sugg = [], piece = null, besoin = [], notes = [];
+    if (ms.includes("peinture")) {
+      const r = parserDevis(saisie, { estimerSurfaceMurs, ligneDevis });
+      sugg = sugg.concat(r.suggestions || []); piece = piece || r.piece;
+      besoin = besoin.concat(r.besoinPrecision || []); notes = notes.concat(r.notes || []);
+    }
+    if (ms.includes("plomberie")) {
+      const r = window.parserDevisPlomberie(saisie);
+      sugg = sugg.concat(r.suggestions || []); piece = piece || r.piece;
+      besoin = besoin.concat(r.besoinPrecision || []); notes = notes.concat(r.notes || []);
+    }
+    const vus = new Set();
+    sugg = sugg.filter((s) => (vus.has(s.cle) ? false : vus.add(s.cle)));
+    const res = { suggestions: sugg, piece, besoinPrecision: besoin, notes };
 
     if (!res.suggestions.length) {
       window.BSTrack && window.BSTrack("blocage", { ou: "generation_vide", saisie: saisie.slice(0, 120) });
@@ -610,7 +634,9 @@
     $("pfMediateur").value = p.mediateur || "";
     $("pfComptable").value = p.comptable || "";
     $("pfColor").value = p.couleur || "#0F5132";
-    $("pfMetier").value = p.metier || "peinture";
+    const _ms = metiersActifs();
+    $("pfMetierPeinture").checked = _ms.includes("peinture");
+    $("pfMetierPlomberie").checked = _ms.includes("plomberie");
     openSheet("sheetProfil");
   });
   $("pfSave").addEventListener("click", () => {
@@ -622,7 +648,7 @@
       tel: $("pfTel").value, email: $("pfEmail").value, siret: $("pfSiret").value,
       tvaIntra: $("pfTvaIntra").value, decennale: $("pfDecennale").value,
       mediateur: $("pfMediateur").value, comptable: $("pfComptable").value.trim(), couleur: $("pfColor").value,
-      metier: $("pfMetier").value,
+      metiers: (function () { const a = []; if ($("pfMetierPeinture").checked) a.push("peinture"); if ($("pfMetierPlomberie").checked) a.push("plomberie"); return a.length ? a : ["peinture"]; })(),
     };
     window.setBrand($("pfColor").value);
     appliquerMetier(); renderChips();

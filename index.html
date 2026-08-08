@@ -44,7 +44,7 @@
       <div class="wz-title">Vos devis, dictés en 30 secondes.</div>
       <div class="wz-sub">Décrivez le chantier à voix haute — on le transforme en devis pro, chiffré, à vos couleurs. Prêt à envoyer au client.</div>
       <div id="wzMetier" style="margin:2px 0 16px">
-        <div style="font-size:.85rem;color:#4B6B5A;margin-bottom:8px;text-align:center;font-weight:600">Votre métier ?</div>
+        <div style="font-size:.85rem;color:#4B6B5A;margin-bottom:8px;text-align:center;font-weight:600">Votre métier ? <span style="font-weight:400;opacity:.75">(plusieurs possibles)</span></div>
         <div style="display:flex;gap:8px">
           <button type="button" class="wz-metier-btn" data-m="peinture" style="flex:1;padding:12px 8px;border-radius:11px;border:2px solid #1A6B45;background:#1A6B45;color:#fff;font-weight:700;font-size:.92rem;cursor:pointer">Peintre / rénovation</button>
           <button type="button" class="wz-metier-btn" data-m="plomberie" style="flex:1;padding:12px 8px;border-radius:11px;border:2px solid #CBD5D0;background:#fff;color:#1C2B22;font-weight:700;font-size:.92rem;cursor:pointer">Plombier / chauffagiste</button>
@@ -237,7 +237,12 @@
     <div class="sheet-grab"></div>
     <h3>Mon entreprise</h3>
     <p class="sub">Ces infos apparaissent en haut de vos devis. Les mentions légales sont obligatoires.</p>
-    <div class="field"><label for="pfMetier">Mon métier</label><select id="pfMetier"><option value="peinture">Peinture / rénovation</option><option value="plomberie">Plomberie / chauffage</option></select></div>
+    <div class="field"><label>Mes métiers <span style="font-weight:400;opacity:.7">(plusieurs possibles)</span></label>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;padding:6px 0">
+        <label style="display:flex;align-items:center;gap:6px;font-weight:500;cursor:pointer"><input type="checkbox" id="pfMetierPeinture" value="peinture"> Peinture / rénovation</label>
+        <label style="display:flex;align-items:center;gap:6px;font-weight:500;cursor:pointer"><input type="checkbox" id="pfMetierPlomberie" value="plomberie"> Plomberie / chauffage</label>
+      </div>
+    </div>
     <div class="field"><label for="pfNom">Nom de l'entreprise</label><input id="pfNom" placeholder="Ex : Peinture Martin"></div>
     <div class="field"><label for="pfContact">Votre nom</label><input id="pfContact" placeholder="Ex : Jean Martin"></div>
     <div class="field"><label for="pfAdresse">Adresse de l'entreprise</label><input id="pfAdresse" placeholder="12 rue des Lilas, 75011 Paris"></div>

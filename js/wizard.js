@@ -60,7 +60,7 @@
     let step = 0;
     const steps = document.querySelectorAll(".wz-step");
     const dots = document.querySelectorAll(".wz-progress .dot");
-    const data = { nom: "", contact: "", tel: "", email: "", siret: "", couleur: "#0F5132", logo: "", metier: "peinture" };
+    const data = { nom: "", contact: "", tel: "", email: "", siret: "", couleur: "#0F5132", logo: "", metiers: ["peinture"] };
 
     // Swatches
     const sw = $("swatches");
@@ -114,23 +114,28 @@
         '<div class="pv-line" style="opacity:.55"><span>TVA 10 %</span><span>81,50 &euro;</span></div>' +
         '<div class="pv-ttc"><span>Total TTC</span><span class="v">896,50 &euro;</span></div>',
     };
+    function primaryMetier() { return data.metiers.includes("peinture") ? "peinture" : "plomberie"; }
     function renderDemo() {
       const el = $("pvLines1");
-      if (el) el.innerHTML = DEMO[data.metier] || DEMO.peinture;
+      if (el) el.innerHTML = DEMO[primaryMetier()] || DEMO.peinture;
       const sub = document.querySelector("#wzPreview1 .pv-sub");
-      if (sub) sub.textContent = data.metier === "plomberie" ? "Devis plomberie" : "Devis DEV-0001";
+      if (sub) sub.textContent = data.metiers.length > 1 ? "Devis multi-métiers"
+        : (primaryMetier() === "plomberie" ? "Devis plomberie" : "Devis DEV-0001");
     }
     const metierBtns = document.querySelectorAll(".wz-metier-btn");
     function markMetier() {
       metierBtns.forEach((b) => {
-        const on = b.dataset.m === data.metier;
+        const on = data.metiers.includes(b.dataset.m);
         b.style.background = on ? "#1A6B45" : "#fff";
         b.style.color = on ? "#fff" : "#1C2B22";
         b.style.borderColor = on ? "#1A6B45" : "#CBD5D0";
       });
     }
     metierBtns.forEach((b) => b.addEventListener("click", () => {
-      data.metier = b.dataset.m; markMetier(); renderDemo();
+      const m = b.dataset.m, i = data.metiers.indexOf(m);
+      if (i >= 0) { if (data.metiers.length > 1) data.metiers.splice(i, 1); } // garder au moins 1
+      else data.metiers.push(m);
+      markMetier(); renderDemo();
     }));
     markMetier(); renderDemo();
 
@@ -171,7 +176,7 @@
     // « Essayer d'abord » : saute le wizard, on demandera les infos au 1er export.
     const btnSkip = $("wzSkip");
     if (btnSkip) btnSkip.addEventListener("click", () => {
-      store.profil = { nom: "", couleur: data.couleur || "#1A6B45", metier: data.metier };
+      store.profil = { nom: "", couleur: data.couleur || "#1A6B45", metiers: data.metiers };
       store.onboarded = true;
       window.setBrand(data.couleur || "#1A6B45");
       wiz.classList.remove("open");
@@ -180,7 +185,7 @@
     });
 
     function finish() {
-      const profil = { nom: data.nom, contact: data.contact, tel: data.tel, email: data.email, siret: data.siret, adresse: data.adresse || "", forme: data.forme || "", couleur: data.couleur, logo: data.logo, decennale: data.decennale || "", metier: data.metier };
+      const profil = { nom: data.nom, contact: data.contact, tel: data.tel, email: data.email, siret: data.siret, adresse: data.adresse || "", forme: data.forme || "", couleur: data.couleur, logo: data.logo, decennale: data.decennale || "", metiers: data.metiers };
       // Écriture tolérante au quota localStorage (logo lourd sur Safari mobile) — bug M4.
       try {
         store.profil = profil;
