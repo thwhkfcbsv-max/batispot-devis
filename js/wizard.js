@@ -138,9 +138,9 @@
     function markMetier() {
       metierBtns.forEach((b) => {
         const on = data.metiers.includes(b.dataset.m);
-        b.style.background = on ? "#1A6B45" : "#fff";
-        b.style.color = on ? "#fff" : "#1C2B22";
-        b.style.borderColor = on ? "#1A6B45" : "#CBD5D0";
+        b.style.background = on ? "#fff" : "rgba(255,255,255,.12)";
+        b.style.color = on ? "#166534" : "#fff";
+        b.style.borderColor = on ? "#fff" : "rgba(255,255,255,.55)";
       });
     }
     metierBtns.forEach((b) => b.addEventListener("click", () => {
