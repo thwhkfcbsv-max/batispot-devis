@@ -155,9 +155,12 @@
     $("wzLogoBtn").addEventListener("click", () => $("wzLogoFile").click());
     $("wzLogoFile").addEventListener("change", (e) => {
       const f = e.target.files[0]; if (!f) return;
-      // Type : whitelist stricte (accept="image/*" est contournable). Pas de SVG (vecteur script).
-      if (!/^image\/(png|jpe?g|webp)$/.test(f.type)) { alert("Format accepté : PNG, JPG ou WEBP."); e.target.value = ""; return; }
-      if (f.size > 1.5 * 1024 * 1024) { alert("Logo trop lourd (max 1,5 Mo)."); e.target.value = ""; return; }
+      // Whitelist images. SVG OK ici : le logo est TOUJOURS affiché via <img src=dataURI>
+      // (setImg), contexte où le navigateur n'exécute aucun script embarqué dans le SVG.
+      if (!/^image\/(png|jpe?g|webp|gif|bmp|svg\+xml|avif)$/.test(f.type)) {
+        alert("Format image accepté : PNG, JPG, WEBP, GIF, BMP, SVG ou AVIF."); e.target.value = ""; return;
+      }
+      if (f.size > 3 * 1024 * 1024) { alert("Logo trop lourd (max 3 Mo)."); e.target.value = ""; return; }
       const reader = new FileReader();
       reader.onload = () => {
         data.logo = reader.result;

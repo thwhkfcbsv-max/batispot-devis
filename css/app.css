@@ -151,24 +151,27 @@ p.sub { color: var(--gris-t); font-size: 15px; margin-bottom: 22px; line-height:
 
 /* ============ APERÇU (devis pro) ============ */
 .apercu { background: #fff; border-radius: var(--radius); box-shadow: var(--ombre-f); overflow: hidden; margin-bottom: 16px; }
-.apercu .band { height: 8px; background: var(--brand); }
-.apercu .inner { padding: 24px 22px; font-size: 13px; }
-.apercu .entete { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 2px solid var(--creme-2); }
-.apercu .logo-box { width: 52px; height: 52px; border-radius: 12px; background: var(--brand); color: var(--brand-ink); display: grid; place-items: center; font-family: var(--ff-disp); font-weight: 800; font-size: 22px; margin-bottom: 8px; overflow: hidden; }
+/* En-tête = bandeau vert de marque */
+.apercu .band { background: linear-gradient(135deg, var(--brand), color-mix(in srgb, var(--brand) 76%, #ffffff)); padding: 22px 24px; color: #fff; }
+.apercu .entete { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
+.apercu .ent-co { display: flex; gap: 12px; align-items: center; }
+.apercu .logo-box { width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,.18); color: #fff; display: grid; place-items: center; font-family: var(--ff-disp); font-weight: 800; font-size: 20px; overflow: hidden; flex: none; }
 .apercu .logo-box img { width: 100%; height: 100%; object-fit: cover; }
-.apercu .soc { font-family: var(--ff-disp); font-weight: 800; font-size: 18px; color: var(--encre); }
-.apercu .coords { color: var(--gris-t); font-size: 12px; line-height: 1.5; margin-top: 3px; }
+.apercu .soc { font-family: var(--ff-disp); font-weight: 800; font-size: 18px; color: #fff; }
+.apercu .coords { color: rgba(255,255,255,.82); font-size: 11.5px; line-height: 1.5; margin-top: 3px; }
 .apercu .num { text-align: right; }
-.apercu .num .lab { font-family: var(--ff-disp); font-weight: 800; font-size: 15px; color: var(--brand); letter-spacing: 1px; }
-.apercu .num .v { color: var(--gris-t); font-size: 12px; line-height: 1.6; }
-.apercu .cli { background: var(--creme); border-radius: 10px; padding: 10px 12px; margin-bottom: 14px; font-size: 12px; color: var(--gris-t); }
-.apercu table { width: 100%; border-collapse: collapse; }
-.apercu th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: .4px; color: var(--gris-t); border-bottom: 1.5px solid var(--encre); padding: 7px 4px; }
-.apercu td { padding: 9px 4px; border-bottom: 1px solid var(--creme-2); font-size: 12.5px; }
-.apercu td.r, .apercu th.r { text-align: right; white-space: nowrap; }
-.apercu .tfin { margin-top: 14px; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; font-size: 12.5px; color: var(--gris-t); }
-.apercu .tfin .ttc { font-family: var(--ff-disp); font-size: 20px; font-weight: 800; color: var(--brand); margin-top: 4px; }
-.apercu .legal { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--creme-2); color: var(--gris-t); font-size: 12px; line-height: 1.55; }
+.apercu .num .lab { font-family: var(--ff-disp); font-weight: 800; font-size: 12px; color: rgba(255,255,255,.8); letter-spacing: 2px; text-transform: uppercase; }
+.apercu .num .v { color: #fff; font-size: 13px; line-height: 1.6; font-weight: 600; }
+.apercu .inner { padding: 22px; font-size: 13px; }
+.apercu .cli { background: var(--creme); border-radius: 10px; padding: 11px 13px; margin-bottom: 16px; font-size: 12px; color: var(--gris-t); }
+.apercu table { width: 100%; border-collapse: collapse; border-radius: 10px; overflow: hidden; }
+.apercu th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: .5px; color: #fff; background: var(--brand); padding: 9px 12px; font-weight: 700; }
+.apercu td { padding: 10px 12px; border-bottom: 1px solid var(--creme-2); font-size: 12.5px; }
+.apercu td.r, .apercu th.r { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.apercu .tfin { margin-top: 16px; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-size: 12.5px; color: var(--gris-t); }
+.apercu .tfin .ttc { align-self: stretch; margin-top: 8px; background: linear-gradient(135deg, var(--brand), color-mix(in srgb, var(--brand) 76%, #ffffff)); color: #fff; border-radius: 12px; padding: 13px 16px; display: flex; justify-content: space-between; align-items: baseline; font-family: var(--ff-disp); font-size: 19px; font-weight: 800; }
+.apercu .tfin .ttc .v { font-variant-numeric: tabular-nums; }
+.apercu .legal { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--creme-2); color: var(--gris-t); font-size: 11.5px; line-height: 1.55; }
 .apercu .sign { margin-top: 14px; display: flex; gap: 14px; }
 .apercu .sign .box { flex: 1; border: 1px dashed var(--trait); border-radius: 8px; padding: 8px; font-size: 10px; color: var(--gris-t); min-height: 56px; }
 

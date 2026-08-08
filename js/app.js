@@ -427,16 +427,19 @@
       : `+ Ajouter les coordonnées du client`;
 
     $("apercuContent").innerHTML = `
-      <div class="band"></div>
-      <div class="inner">
+      <div class="band">
         <div class="entete">
-          <div>
+          <div class="ent-co">
             <div class="logo-box" id="apLogo">${esc(initiale)}</div>
-            <div class="soc">${esc(p.nom) || "Votre entreprise"}</div>
-            <div class="coords">${esc(p.contact) || ""}${p.forme ? "<br>" + esc(p.forme) : ""}${p.adresse ? "<br>" + esc(p.adresse) : ""}${coordsTel ? "<br>" + coordsTel : ""}${p.siret ? "<br>SIRET " + esc(p.siret) : ""}${p.tvaIntra ? " · TVA " + esc(p.tvaIntra) : ""}</div>
+            <div>
+              <div class="soc">${esc(p.nom) || "Votre entreprise"}</div>
+              <div class="coords">${esc(p.contact) || ""}${p.forme ? "<br>" + esc(p.forme) : ""}${p.adresse ? "<br>" + esc(p.adresse) : ""}${coordsTel ? "<br>" + coordsTel : ""}${p.siret ? "<br>SIRET " + esc(p.siret) : ""}${p.tvaIntra ? " · TVA " + esc(p.tvaIntra) : ""}</div>
+            </div>
           </div>
           <div class="num"><div class="lab">DEVIS</div><div class="v">${num}<br>${date}</div></div>
         </div>
+      </div>
+      <div class="inner">
         <div class="cli" id="apCli" style="cursor:pointer">${cli}</div>
         <table>
           <thead><tr><th>Prestation</th><th class="r">Qté</th><th class="r">P.U. HT</th><th class="r">Total HT</th></tr></thead>
