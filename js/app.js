@@ -139,6 +139,7 @@
     const res = parserDevis(saisie, { estimerSurfaceMurs, ligneDevis });
 
     if (!res.suggestions.length) {
+      window.BSTrack && window.BSTrack("blocage", { ou: "generation_vide", saisie: saisie.slice(0, 120) });
       toast("Je n'ai pas reconnu de prestation. Reformulez ou ajoutez à la main.");
       etat.lignes = [];
       etat.piece = null;
@@ -159,6 +160,7 @@
     etat._exporte = false;
     etat._precisions = res.besoinPrecision || [];
     etat._notes = res.notes || [];
+    window.BSTrack && window.BSTrack("devis_genere", { lignes: etat.lignes.length, piece: etat.piece || null, precisions: (etat._precisions || []).length });
     goto("devis");
   }
 
@@ -191,6 +193,7 @@
     micBtn.style.opacity = ".4";
   }
   function startRec(existing) {
+    window.BSTrack && window.BSTrack("dictee");
     try { recog.start(); recording = true; micBtn.classList.add("rec"); micBtn.textContent = "⏹"; micHint.textContent = "Je vous écoute…"; }
     catch { /* déjà démarré */ }
   }
@@ -483,6 +486,7 @@
     // Le numéro est réservé par sauverDevis dès la 1re sauvegarde (plus de double comptage).
     etat._exporte = true;
     sauverDevis("envoyé");
+    window.BSTrack && window.BSTrack("export_pdf", { numero: etat.numero, totalTTC: calculerTotaux(etat.lignes, { tva: etat.tva, remise: etat.remise }).totalTTC });
     setTimeout(() => window.print(), 60);
   }
 
@@ -679,6 +683,7 @@
 
   // ---- Partager l'app ----
   function shareApp() {
+    window.BSTrack && window.BSTrack("share");
     const url = "https://devis.batispot.pro";
     const data = {
       title: "BatiSpot Devis",
@@ -744,6 +749,7 @@
     const dateStr = now.toLocaleDateString("fr-FR") + " à " + now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
     etat.signature = { img: pad.toDataURL(), dateStr };
     sauverDevis("signé");
+    window.BSTrack && window.BSTrack("signature_ok", { numero: etat.numero });
     closeSheet("sheetSign");
     renderApercu();
     toast("Devis signé ✓");
@@ -770,5 +776,6 @@
   window.__afterOnboard = () => goto("saisie");
 
   // Démarrage
+  window.BSTrack && window.BSTrack("app_open");
   goto("saisie");
 })();

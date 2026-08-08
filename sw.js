@@ -1,10 +1,11 @@
 /* Service worker minimal — cache app shell pour usage hors-ligne (chantier sans réseau). */
-const CACHE = "devix-v8";
+const CACHE = "devix-v9";
 const ASSETS = [
   "index.html",
   "css/app.css",
   "js/vendor/supabase.js",
   "js/auth.js",
+  "js/track.js",
   "js/pricing-peinture.js",
   "js/parser.js",
   "js/signature.js",
