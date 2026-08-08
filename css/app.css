@@ -282,17 +282,7 @@ p.sub { color: var(--gris-t); font-size: 15px; margin-bottom: 22px; line-height:
   .apercu .band, .apercu .logo-box, .ap-sign .signed,
   .apercu .num .lab, .apercu .tfin .ttc, .apercu th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .apercu table, .ap-ech, .ap-sign, .apercu .legal { page-break-inside: avoid; }
-  .apercu .ap-madewith { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
-
-/* Mention virale (footer du devis) — présente sur chaque PDF envoyé au client = visibilité gratuite.
-   Discrète (ne dénature pas le devis pro). Levier payant futur : « retirer la mention ». */
-.apercu .ap-madewith {
-  margin-top: 16px; padding-top: 10px; border-top: 1px solid var(--creme-2);
-  text-align: center; font-size: 10px; line-height: 1.5; color: var(--gris-t);
-}
-.apercu .ap-madewith b { color: var(--brand); font-weight: 800; }
-.apercu .ap-madewith span { color: var(--brand); font-weight: 600; }
 
 /* =========================================================
    WIZARD ONBOARDING (premier lancement)

@@ -492,7 +492,6 @@
           ${p.mediateur ? "<br>Médiation de la consommation : " + esc(p.mediateur) + "." : ""}
         </div>
         ${signBlock()}
-        <div class="ap-madewith">Devis réalisé gratuitement en 30 s avec <b>BatiSpot</b> — l'outil de devis des artisans · <span>batispot.pro</span></div>
       </div>
       ${etat.signature ? "" : `<button class="btn-sign-cta" id="btnSign">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
