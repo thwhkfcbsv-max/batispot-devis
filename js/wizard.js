@@ -113,14 +113,26 @@
         '<div class="pv-line" style="opacity:.55"><span>Sous-total HT</span><span>815,00 &euro;</span></div>' +
         '<div class="pv-line" style="opacity:.55"><span>TVA 10 %</span><span>81,50 &euro;</span></div>' +
         '<div class="pv-ttc"><span>Total TTC</span><span class="v">896,50 &euro;</span></div>',
+      mixte:
+        '<div class="pv-line"><span>Peinture murs (2 couches)</span><span>812,00 &euro;</span></div>' +
+        '<div class="pv-line"><span>Peinture plafond (2 couches)</span><span>384,00 &euro;</span></div>' +
+        '<div class="pv-line"><span>Pose WC</span><span>180,00 &euro;</span></div>' +
+        '<div class="pv-line"><span>Mitigeur thermostatique</span><span>280,00 &euro;</span></div>' +
+        '<div class="pv-line" style="opacity:.55"><span>Sous-total HT</span><span>1 656,00 &euro;</span></div>' +
+        '<div class="pv-line" style="opacity:.55"><span>TVA 10 %</span><span>165,60 &euro;</span></div>' +
+        '<div class="pv-ttc"><span>Total TTC</span><span class="v">1 821,60 &euro;</span></div>',
     };
-    function primaryMetier() { return data.metiers.includes("peinture") ? "peinture" : "plomberie"; }
+    function demoKey() {
+      const p = data.metiers.includes("peinture"), pl = data.metiers.includes("plomberie");
+      if (p && pl) return "mixte";
+      return pl ? "plomberie" : "peinture";
+    }
     function renderDemo() {
       const el = $("pvLines1");
-      if (el) el.innerHTML = DEMO[primaryMetier()] || DEMO.peinture;
+      if (el) el.innerHTML = DEMO[demoKey()] || DEMO.peinture;
       const sub = document.querySelector("#wzPreview1 .pv-sub");
-      if (sub) sub.textContent = data.metiers.length > 1 ? "Devis multi-métiers"
-        : (primaryMetier() === "plomberie" ? "Devis plomberie" : "Devis DEV-0001");
+      const k = demoKey();
+      if (sub) sub.textContent = k === "mixte" ? "Devis multi-métiers" : (k === "plomberie" ? "Devis plomberie" : "Devis DEV-0001");
     }
     const metierBtns = document.querySelectorAll(".wz-metier-btn");
     function markMetier() {
