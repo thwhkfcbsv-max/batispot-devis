@@ -127,6 +127,17 @@
     });
     btnBack.addEventListener("click", () => show(step - 1));
 
+    // « Essayer d'abord » : saute le wizard, on demandera les infos au 1er export.
+    const btnSkip = $("wzSkip");
+    if (btnSkip) btnSkip.addEventListener("click", () => {
+      store.profil = { nom: "", couleur: data.couleur || "#1A6B45" };
+      store.onboarded = true;
+      window.setBrand(data.couleur || "#1A6B45");
+      wiz.classList.remove("open");
+      app.style.display = "flex";
+      if (window.__afterOnboard) window.__afterOnboard();
+    });
+
     function finish() {
       const profil = { nom: data.nom, contact: data.contact, tel: data.tel, email: data.email, siret: data.siret, adresse: data.adresse || "", forme: data.forme || "", couleur: data.couleur, logo: data.logo, decennale: data.decennale || "" };
       // Écriture tolérante au quota localStorage (logo lourd sur Safari mobile) — bug M4.

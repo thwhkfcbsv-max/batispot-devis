@@ -447,6 +447,11 @@
 
   // Export PDF via l'impression navigateur (iOS/Android : "Enregistrer en PDF" / partager).
   function exportPDF() {
+    if (!store.profil.nom) {
+      toast("Complétez d'abord le nom de votre entreprise.");
+      $("btnProfil").click();
+      return;
+    }
     if (!etat.client || !etat.client.nom) {
       toast("Ajoutez d'abord les coordonnées du client (obligatoire).");
       openClient();
