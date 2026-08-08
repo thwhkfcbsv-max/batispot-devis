@@ -329,6 +329,13 @@ p.sub { color: var(--gris-t); font-size: 15px; margin-bottom: 22px; line-height:
 .wz-preview .pv-line:first-child { border-top: 0; }
 .wz-preview .pv-ttc { display: flex; justify-content: space-between; margin-top: 10px; background: linear-gradient(135deg, var(--brand), color-mix(in srgb, var(--brand) 76%, #ffffff)); color: #fff; border-radius: 10px; padding: 10px 13px; font-family: var(--ff-disp); font-weight: 800; }
 .wz-preview .pv-ttc .v { color: #fff; }
+.wz-preview .pv-cond { margin-top: 12px; background: var(--creme); border-radius: 9px; padding: 9px 11px; }
+.wz-preview .pv-cond-t { font-size: 9.5px; text-transform: uppercase; letter-spacing: .5px; color: var(--gris-t); font-weight: 700; margin-bottom: 5px; }
+.wz-preview .pv-cond-r { display: flex; justify-content: space-between; font-size: 11px; color: var(--gris-t); padding: 2px 0; }
+.wz-preview .pv-cond-r span:last-child { font-weight: 700; color: var(--encre); }
+.wz-preview .pv-sign { display: flex; gap: 8px; margin-top: 10px; }
+.wz-preview .pv-sign-box { flex: 1; border: 1px dashed var(--trait); border-radius: 8px; padding: 8px 9px; font-size: 9.5px; color: var(--gris-t); min-height: 44px; }
+.wz-preview .pv-legal { margin-top: 10px; font-size: 9px; color: var(--gris-t); line-height: 1.5; }
 
 .logo-upload { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
 .logo-upload .prev { width: 60px; height: 60px; border-radius: 14px; background: rgba(255,255,255,.1); display: grid; place-items: center; overflow: hidden; font-size: 24px; }
