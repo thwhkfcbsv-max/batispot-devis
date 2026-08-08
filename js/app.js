@@ -68,7 +68,16 @@
     if (ms.includes("electricite")) Object.assign(cat, window.CATALOGUE_ELECTRICITE);
     return cat;
   }
-  function appliquerMetier() { setCatalogue(catalogueActif()); }
+  function zoneCP() {
+    const p = store.profil;
+    if (p.cp) return p.cp;
+    const m = (p.adresse || "").match(/\b(\d{5})\b/);   // repli : code postal dans l'adresse
+    return m ? m[1] : "";
+  }
+  function appliquerMetier() {
+    if (typeof window !== "undefined" && window.coefZoneFromCP) window.__ZONE_COEF = window.coefZoneFromCP(zoneCP());
+    setCatalogue(catalogueActif());
+  }
   const CHIPS_METIER = {
     peinture: [
       ["Salon 24 m²", "Repeindre un salon de 24 m², murs et plafond, avec sous-couche et protection."],
@@ -643,7 +652,7 @@
   $("btnProfil").addEventListener("click", () => {
     const p = store.profil;
     $("pfNom").value = p.nom || ""; $("pfContact").value = p.contact || "";
-    $("pfAdresse").value = p.adresse || ""; $("pfForme").value = p.forme || "";
+    $("pfAdresse").value = p.adresse || ""; $("pfCP").value = p.cp || ""; $("pfForme").value = p.forme || "";
     $("pfTel").value = p.tel || ""; $("pfEmail").value = p.email || ""; $("pfSiret").value = p.siret || "";
     $("pfTvaIntra").value = p.tvaIntra || ""; $("pfDecennale").value = p.decennale || "";
     $("pfMediateur").value = p.mediateur || "";
@@ -660,7 +669,7 @@
     store.profil = {
       ...prev,
       nom: $("pfNom").value, contact: $("pfContact").value,
-      adresse: $("pfAdresse").value, forme: $("pfForme").value,
+      adresse: $("pfAdresse").value, cp: $("pfCP").value, forme: $("pfForme").value,
       tel: $("pfTel").value, email: $("pfEmail").value, siret: $("pfSiret").value,
       tvaIntra: $("pfTvaIntra").value, decennale: $("pfDecennale").value,
       mediateur: $("pfMediateur").value, comptable: $("pfComptable").value.trim(), couleur: $("pfColor").value,

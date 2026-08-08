@@ -27,7 +27,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=28">
+<link rel="stylesheet" href="css/app.css?v=29">
 </head>
 <body>
 
@@ -251,6 +251,7 @@
     <div class="field"><label for="pfNom">Nom de l'entreprise</label><input id="pfNom" placeholder="Ex : Peinture Martin"></div>
     <div class="field"><label for="pfContact">Votre nom</label><input id="pfContact" placeholder="Ex : Jean Martin"></div>
     <div class="field"><label for="pfAdresse">Adresse de l'entreprise</label><input id="pfAdresse" placeholder="12 rue des Lilas, 75011 Paris"></div>
+    <div class="field"><label for="pfCP">Code postal (ajuste les prix à votre zone)</label><input id="pfCP" inputmode="numeric" placeholder="75011"></div>
     <div class="field"><label for="pfForme">Forme juridique</label><input id="pfForme" placeholder="Ex : EI, SARL au capital de 5 000 €, RCS Paris 123…"></div>
     <div class="field"><label for="pfTel">Téléphone</label><input id="pfTel" type="tel" placeholder="06 ..."></div>
     <div class="field"><label for="pfEmail">Email</label><input id="pfEmail" type="email" placeholder="contact@..."></div>
@@ -325,17 +326,18 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="js/vendor/supabase.js?v=28"></script>
-<script src="js/auth.js?v=28"></script>
-<script src="js/track.js?v=28"></script>
-<script src="js/pricing-peinture.js?v=28"></script>
-<script src="js/pricing-plomberie.js?v=28"></script>
-<script src="js/pricing-electricite.js?v=28"></script>
-<script src="js/parser.js?v=28"></script>
-<script src="js/parser-plomberie.js?v=28"></script>
-<script src="js/parser-electricite.js?v=28"></script>
-<script src="js/signature.js?v=28"></script>
-<script src="js/wizard.js?v=28"></script>
-<script src="js/app.js?v=28"></script>
+<script src="js/vendor/supabase.js?v=29"></script>
+<script src="js/auth.js?v=29"></script>
+<script src="js/track.js?v=29"></script>
+<script src="js/pricing-geo.js?v=29"></script>
+<script src="js/pricing-peinture.js?v=29"></script>
+<script src="js/pricing-plomberie.js?v=29"></script>
+<script src="js/pricing-electricite.js?v=29"></script>
+<script src="js/parser.js?v=29"></script>
+<script src="js/parser-plomberie.js?v=29"></script>
+<script src="js/parser-electricite.js?v=29"></script>
+<script src="js/signature.js?v=29"></script>
+<script src="js/wizard.js?v=29"></script>
+<script src="js/app.js?v=29"></script>
 </body>
 </html>

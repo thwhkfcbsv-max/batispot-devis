@@ -14,18 +14,39 @@ const CATALOGUE_PEINTURE = {
   // clé : { label, unite, prixRef (marché), aide }
   peinture_mur:        { label: "Peinture murs (2 couches)",            unite: "m²", prixRef: 28,  aide: "Application 2 couches sur murs préparés" },
   peinture_plafond:    { label: "Peinture plafond (2 couches)",         unite: "m²", prixRef: 32,  aide: "Plafond, 2 couches (surcoût vs mur)" },
-  peinture_boiserie:   { label: "Peinture boiseries / portes",          unite: "u",  prixRef: 55,  aide: "Par porte ou élément boisé (face + chants)" },
+  peinture_boiserie:   { label: "Peinture boiseries / portes",          unite: "u",  prixRef: 65,  aide: "Par porte ou élément boisé (face + chants)" },
   peinture_plinthes:   { label: "Peinture plinthes",                    unite: "ml", prixRef: 6,   aide: "Par mètre linéaire de plinthe" },
 
   // Préparation (souvent oubliée = marge perdue)
-  prepa_rebouchage:    { label: "Rebouchage / petits travaux",          unite: "m²", prixRef: 8,   aide: "Rebouchage fissures, trous, ponçage léger" },
+  prepa_lessivage:     { label: "Lessivage / dégraissage murs",         unite: "m²", prixRef: 8,   aide: "Nettoyage/dégraissage du support avant peinture" },
+  prepa_poncage:       { label: "Ponçage / égrenage",                   unite: "m²", prixRef: 10,  aide: "Ponçage/égrenage pour accroche (support ancien)" },
+  prepa_rebouchage:    { label: "Rebouchage / petits travaux",          unite: "m²", prixRef: 12,  aide: "Rebouchage fissures, trous, ponçage léger" },
   prepa_enduit:        { label: "Enduit de lissage complet",            unite: "m²", prixRef: 18,  aide: "Enduit sur toute la surface (support dégradé)" },
+  prepa_ratissage_mur: { label: "Ratissage complet mur",               unite: "m²", prixRef: 30,  aide: "Enduit pelliculaire sur mur pour finition lisse" },
+  prepa_ratissage_plafond: { label: "Ratissage complet plafond",       unite: "m²", prixRef: 38,  aide: "Enduit pelliculaire sur plafond (surcoût vs mur)" },
+  prepa_bandes_placo:  { label: "Bandes / joints de placo",             unite: "m²", prixRef: 10,  aide: "Jointoiement + bande à joint, finition placo" },
   prepa_sous_couche:   { label: "Sous-couche / primaire d'accroche",    unite: "m²", prixRef: 7,   aide: "Impression avant peinture (support neuf/poreux)" },
+  traitement_humidite: { label: "Traitement anti-humidité / moisissure", unite: "m²", prixRef: 30, aide: "Traitement anti-fongique (salpêtre, moisissure)" },
   decollage_papier:    { label: "Décollage papier peint",               unite: "m²", prixRef: 9,   aide: "Dépose ancien revêtement mural" },
 
   // Revêtements
   pose_toile_verre:    { label: "Pose toile de verre",                  unite: "m²", prixRef: 22,  aide: "Fourniture + pose toile de verre (hors peinture)" },
-  pose_papier_peint:   { label: "Pose papier peint",                    unite: "m²", prixRef: 20,  aide: "Pose (hors fourniture papier)" },
+  pose_papier_peint:   { label: "Pose papier peint",                    unite: "m²", prixRef: 25,  aide: "Pose (hors fourniture papier)" },
+
+  // Éléments à l'unité
+  peinture_radiateur:  { label: "Peinture radiateur",                   unite: "u",  prixRef: 90,  aide: "Par radiateur (fonte/acier, démontage léger)" },
+  peinture_tuyaux:     { label: "Peinture tuyaux / canalisations",      unite: "forfait", prixRef: 60, aide: "Tuyauterie, gaines, conduites apparentes" },
+  peinture_porte_placard: { label: "Peinture porte de placard",         unite: "u",  prixRef: 60,  aide: "Par façade/porte de placard (coulissant compris)" },
+  peinture_fenetre_bois: { label: "Peinture fenêtre bois",              unite: "u",  prixRef: 120, aide: "Par châssis/croisée bois (face + dormant)" },
+  vernis_boiseries:    { label: "Vernis / vitrification boiseries",     unite: "u",  prixRef: 65,  aide: "Vernis, vitrification ou lasure d'un élément boisé" },
+  laque_finition:      { label: "Laque / finition laquée",             unite: "u",  prixRef: 110, aide: "Laquage / finition tendue par élément" },
+
+  // Surfaces spécifiques
+  peinture_volets:     { label: "Peinture volets bois",                 unite: "u",  prixRef: 45,  aide: "Par volet / persienne / contrevent" },
+  peinture_facade:     { label: "Peinture façade extérieure",           unite: "m²", prixRef: 35,  aide: "Ravalement / peinture façade, crépi extérieur" },
+  peinture_sol_resine: { label: "Peinture sol / résine époxy",          unite: "m²", prixRef: 40,  aide: "Sol béton peint / résine époxy (garage, atelier)" },
+  patine_beton_cire:   { label: "Patine / béton ciré / effet déco",     unite: "m²", prixRef: 170, aide: "Béton ciré, stuc, tadelakt, enduit décoratif" },
+  peinture_escalier:   { label: "Peinture escalier / rampe",            unite: "forfait", prixRef: 250, aide: "Marches, rampe, garde-corps, cage d'escalier" },
 
   // Divers / forfaits
   protection_chantier: { label: "Protection & installation chantier",   unite: "forfait", prixRef: 80,  aide: "Bâches, adhésifs, protection sols/meubles" },
@@ -77,8 +98,9 @@ function ligneDevis(cle, quantite, tarifsPerso = {}) {
   const item = CAT[cle] || CATALOGUE_PEINTURE[cle];
   if (!item) return null;
   const prixPerso = tarifsPerso[cle];
-  // prix : perso si fourni (borné >= 0, virgule FR acceptée), sinon prix marché
-  const prixUnitaire = (prixPerso != null && prixPerso !== "") ? num(prixPerso) : item.prixRef;
+  // prix : perso si fourni ; sinon prix marché AJUSTÉ à la zone géographique de l'artisan (× coef).
+  const coefZone = (typeof window !== "undefined" && window.__ZONE_COEF) ? window.__ZONE_COEF : 1;
+  const prixUnitaire = (prixPerso != null && prixPerso !== "") ? num(prixPerso) : Math.round(item.prixRef * coefZone * 100) / 100;
   // forfait => quantité toujours 1 (jamais multipliée par une surface)
   const qte = item.unite === "forfait" ? 1 : num(quantite);
   return {

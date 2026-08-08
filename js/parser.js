@@ -14,14 +14,39 @@
 const REGLES = [
   { cles: ["mur", "murs"],                         action: "peinture_mur" },
   { cles: ["plafond", "plafonds"],                 action: "peinture_plafond" },
-  { cles: ["porte", "portes", "boiserie", "boiseries", "fenetre", "fenetres", "fenêtre", "fenêtres", "volet", "volets"], action: "peinture_boiserie", parQuantite: true },
+  { cles: ["porte", "portes", "boiserie", "boiseries"], action: "peinture_boiserie", parQuantite: true },
   { cles: ["plinthe", "plinthes"],                 action: "peinture_plinthes" },
+
+  // Préparation
+  { cles: ["lessivage", "lessiver", "degraissage", "laver murs"], action: "prepa_lessivage" },
+  { cles: ["poncage", "poncer", "egrenage", "egrener"], action: "prepa_poncage" },
   { cles: ["reboucher", "rebouchage", "fissure", "fissures", "trou", "trous"], action: "prepa_rebouchage" },
+  { cles: ["ratissage plafond"],                   action: "prepa_ratissage_plafond" }, // avant ratissage mur (plus spécifique)
+  { cles: ["ratissage", "ratisser", "enduit pelliculaire", "mur lisse"], action: "prepa_ratissage_mur" },
   { cles: ["enduit", "lissage", "lisser"],         action: "prepa_enduit" },
+  { cles: ["bande", "joint placo", "jointoiement", "bande a joint", "finition placo"], action: "prepa_bandes_placo" },
   { cles: ["sous-couche", "sous couche", "primaire", "impression"], action: "prepa_sous_couche" },
+  { cles: ["anti-humidite", "moisissure", "salpetre", "anti-fongique"], action: "traitement_humidite" },
+
+  // Revêtements
   { cles: ["papier peint", "papier"],              action: "detecte_papier" }, // ambigu → précision
   { cles: ["décoller", "decoller", "décollage", "arracher"], action: "decollage_papier" },
   { cles: ["toile de verre", "toile"],             action: "pose_toile_verre" },
+
+  // Éléments à l'unité
+  { cles: ["radiateur", "fonte", "peindre radiateur"], action: "peinture_radiateur", motCompte: "radiateur" },
+  { cles: ["tuyau", "canalisation", "tuyauterie", "gaine", "conduite"], action: "peinture_tuyaux" },
+  { cles: ["porte placard", "placard", "coulissant", "facade placard"], action: "peinture_porte_placard", motCompte: "placard" },
+  { cles: ["fenetre", "fenêtre", "chassis", "croisee"], action: "peinture_fenetre_bois", motCompte: "fenetre" },
+  { cles: ["vernis", "vernissage", "vitrification", "lasure"], action: "vernis_boiseries", motCompte: "vernis" },
+  { cles: ["laque", "laquage", "finition tendue"], action: "laque_finition", motCompte: "laque" },
+
+  // Surfaces spécifiques
+  { cles: ["volet", "persienne", "contrevent"],    action: "peinture_volets", motCompte: "volet" },
+  { cles: ["facade", "ravalement", "exterieur", "mur exterieur", "crepi"], action: "peinture_facade" },
+  { cles: ["sol", "resine", "epoxy", "sol garage", "beton peint"], action: "peinture_sol_resine" },
+  { cles: ["beton cire", "patine", "stuc", "tadelakt", "effet deco", "enduit decoratif"], action: "patine_beton_cire" },
+  { cles: ["escalier", "marche", "rampe", "garde-corps", "cage escalier"], action: "peinture_escalier" },
 ];
 
 const MOTS_PIECES = {
@@ -52,10 +77,10 @@ function extraireNombre(txt, motCle) {
   return chiffres[m[1].toLowerCase()] || parseInt(m[1], 10) || 1;
 }
 
-/** Compte les éléments boisés cités (portes + fenêtres + volets) et somme leurs quantités. */
+/** Compte les portes / boiseries citées (fenêtres et volets ont leurs propres prestations). */
 function compterBoiseries(txt) {
   let total = 0, trouve = false;
-  ["porte", "fenetre", "fenêtre", "volet"].forEach((mot) => {
+  ["porte"].forEach((mot) => {
     if (txt.includes(mot)) { trouve = true; total += extraireNombre(txt, mot); }
   });
   return trouve ? total : 1;
@@ -66,7 +91,7 @@ function compterBoiseries(txt) {
  * Renvoie des SUGGESTIONS (l'artisan valide/ajuste ensuite — jamais imposé).
  */
 function parserDevis(texteBrut, { estimerSurfaceMurs, ligneDevis }) {
-  const txt = (texteBrut || "").toLowerCase();
+  const txt = (texteBrut || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
   const suggestions = [];
   const besoinPrecision = [];
   const notes = [];
@@ -76,7 +101,7 @@ function parserDevis(texteBrut, { estimerSurfaceMurs, ligneDevis }) {
   let surfaceSol = surfaces.length ? surfaces[0] : null;
   let pieceDetectee = null;
   for (const [nom, surfaceDefaut] of Object.entries(MOTS_PIECES)) {
-    if (txt.includes(nom)) {
+    if (txt.includes(nom.normalize("NFD").replace(/[̀-ͯ]/g, ""))) {
       pieceDetectee = nom;
       if (surfaceSol == null) { surfaceSol = surfaceDefaut; notes.push(`Surface "${nom}" estimée à ${surfaceDefaut} m² (à confirmer).`); }
       break;
@@ -94,7 +119,7 @@ function parserDevis(texteBrut, { estimerSurfaceMurs, ligneDevis }) {
   // 2) Appliquer les règles mots-clés
   const dejaAjoute = new Set();
   for (const regle of REGLES) {
-    const match = regle.cles.some((k) => txt.includes(k));
+    const match = regle.cles.some((k) => txt.includes(k.normalize("NFD").replace(/[̀-ͯ]/g, "")));
     if (!match) continue;
 
     if (regle.action === "detecte_papier") {
@@ -117,22 +142,37 @@ function parserDevis(texteBrut, { estimerSurfaceMurs, ligneDevis }) {
       }
       continue;
     }
+    // "ratissage plafond" ne doit pas déclencher AUSSI le ratissage mur (via "ratissage" nu).
+    if (regle.action === "prepa_ratissage_mur") {
+      const ratissageMurReel = /ratiss(?:age|er)(?!\s+plafond)|enduit pelliculaire|mur lisse/i.test(txt);
+      if (!ratissageMurReel) continue;
+    }
+
     if (dejaAjoute.has(regle.action)) continue;
     dejaAjoute.add(regle.action);
 
     let quantite = 0;
-    const item = { cle: regle.action };
     switch (regle.action) {
       case "peinture_mur":
+      case "prepa_lessivage":
+      case "prepa_poncage":
       case "prepa_rebouchage":
       case "prepa_enduit":
+      case "prepa_ratissage_mur":
+      case "prepa_bandes_placo":
       case "prepa_sous_couche":
+      case "traitement_humidite":
       case "decollage_papier":
       case "pose_toile_verre":
+      // Surfaces spécifiques chiffrées au m² (façade, sol, patine) — repli sur surface murs.
+      case "peinture_facade":
+      case "peinture_sol_resine":
+      case "patine_beton_cire":
         quantite = surfaceMurs || 0;
-        if (!surfaceMurs) besoinPrecision.push(`Quelle surface de murs pour « ${CATALOGUE_LABEL(regle.action)} » ?`);
+        if (!surfaceMurs) besoinPrecision.push(`Quelle surface pour « ${CATALOGUE_LABEL(regle.action)} » ?`);
         break;
       case "peinture_plafond":
+      case "prepa_ratissage_plafond":
         quantite = surfacePlafond || 0;
         if (!surfacePlafond) besoinPrecision.push("Quelle surface de plafond ?");
         break;
@@ -141,6 +181,20 @@ function parserDevis(texteBrut, { estimerSurfaceMurs, ligneDevis }) {
         break;
       case "peinture_plinthes":
         quantite = surfaceSol ? Math.round(4 * Math.sqrt(surfaceSol)) : 0; // périmètre
+        break;
+      // Éléments comptés à l'unité (nb d'éléments cités, défaut 1).
+      case "peinture_radiateur":
+      case "peinture_porte_placard":
+      case "peinture_fenetre_bois":
+      case "vernis_boiseries":
+      case "laque_finition":
+      case "peinture_volets":
+        quantite = extraireNombre(txt, regle.motCompte || regle.cles[0]);
+        break;
+      // Forfaits (quantité forcée à 1 par ligneDevis, mais on la pose explicitement).
+      case "peinture_tuyaux":
+      case "peinture_escalier":
+        quantite = 1;
         break;
       default:
         quantite = surfaceMurs || 0;
