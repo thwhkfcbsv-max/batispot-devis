@@ -28,13 +28,13 @@
     { cles: ["chaudiere", "gaz", "condensation", "chaudiere murale"],    action: "pose_chaudiere_gaz" },
     { cles: ["pompe a chaleur", "pac", "air eau", "air/eau", "aerothermie"], action: "pose_pac_air_eau" },
     { cles: ["clim reversible", "air air", "air/air", "split", "multisplit", "monosplit", "climatisation"], action: "pose_pac_air_air" },
-    { cles: ["plancher chauffant", "pcrbt", "dalle chauffante", "plancher hydraulique"], action: "pose_plancher_chauffant" },
+    { cles: ["plancher chauffant", "pcrbt", "dalle chauffante", "plancher hydraulique"], action: "pose_plancher_chauffant", compte: true, motCompte: "plancher" },
     { cles: ["desembouage", "desembouer", "curage circuit", "boues"],    action: "desembouage" },
     { cles: ["ramonage", "conduit", "tubage"],                          action: "ramonage" },
     // Lot RÉSEAU (placé AVANT point_eau + evacuation, cf. SUPPRESS)
     { cles: ["deplacer arrivee", "deplacer evacuation", "modifier reseau"], action: "deplacement_reseau" },
-    { cles: ["tuyauterie", "alimentation", "cuivre", "multicouche", "canalisation eau"], action: "reseau_alimentation" },
-    { cles: ["evacuation", "eaux usees", "pvc", "descente", "colonne eu"], action: "reseau_evacuation" },
+    { cles: ["tuyauterie", "alimentation", "cuivre", "multicouche", "canalisation eau"], action: "reseau_alimentation", compte: true, motCompte: "tuyauterie" },
+    { cles: ["evacuation", "eaux usees", "pvc", "descente", "colonne eu"], action: "reseau_evacuation", compte: true, motCompte: "evacuation" },
     { cles: ["vmc", "ventilation", "simple flux", "double flux", "extracteur"], action: "pose_vmc" },
 
     // --- Règles générales (historiques) ---
@@ -87,7 +87,7 @@
     var thermo = /thermostatiqu/.test(txt);
 
     REGLES_PLOMB.forEach(function (r) {
-      var match = r.cles.some(function (k) { return txt.indexOf(k.normalize("NFD").replace(/[̀-ͯ]/g, "")) !== -1; });
+      var match = r.cles.some(function (k) { return window.contientMot ? window.contientMot(txt, k) : txt.indexOf(k.normalize("NFD").replace(/[̀-ͯ]/g, "")) !== -1; });
       if (!match) return;
       var action = r.action;
       if (action === "pose_mitigeur" && thermo) action = "pose_mitigeur_th";

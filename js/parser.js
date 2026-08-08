@@ -68,14 +68,32 @@ function extraireSurfaces(txt) {
   return res;
 }
 
-/** Extrait un nombre d'unités ("3 portes", "deux portes"). */
-function extraireNombre(txt, motCle) {
-  const chiffres = { un: 1, une: 1, deux: 2, trois: 3, quatre: 4, cinq: 5, six: 6, sept: 7, huit: 8, neuf: 9, dix: 10 };
-  const re = new RegExp(`(\\d+|un|une|deux|trois|quatre|cinq|six|sept|huit|neuf|dix)\\s+${motCle}`, "i");
-  const m = txt.match(re);
-  if (!m) return 1;
-  return chiffres[m[1].toLowerCase()] || parseInt(m[1], 10) || 1;
+const MOTS_CHIFFRES = "un|une|deux|trois|quatre|cinq|six|sept|huit|neuf|dix";
+function escapeRe(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+function motToInt(w) { const c = { un: 1, une: 1, deux: 2, trois: 3, quatre: 4, cinq: 5, six: 6, sept: 7, huit: 8, neuf: 9, dix: 10 }; return c[w] || parseInt(w, 10) || 1; }
+
+/** Vrai si kw apparaît comme MOT ENTIER (frontières), pas en sous-chaîne.
+ *  Tue les faux positifs : "pac"∉"espace", "sol"∉"resolu", "id"∉"humidite", "four"∉"fourreau".
+ *  txt supposé déjà NFD-normalisé ; kw normalisé ici. */
+function contientMot(txt, kw) {
+  const k = escapeRe(String(kw).normalize("NFD").replace(/[̀-ͯ]/g, ""));
+  return new RegExp(`(?:^|[^a-z0-9])${k}s?(?:[^a-z0-9]|$)`).test(txt); // s? = pluriel FR (prise→prises)
 }
+
+/** Extrait une quantité pour motCle. Gère "3 X", "X de 3", "10 metres de X", "X de 10 metres". Défaut 1. */
+function extraireNombre(txt, motCle) {
+  const kw = escapeRe(String(motCle).normalize("NFD").replace(/[̀-ͯ]/g, ""));
+  const N = `(\\d+|${MOTS_CHIFFRES})`;
+  const U = `(?:m[eè]tres?|metres?|ml|m2|m²)`;
+  const pats = [
+    new RegExp(`${N}\\s+${U}\\s+(?:de\\s+|d'\\s*)?${kw}`, "i"),  // "10 metres de saignee"
+    new RegExp(`${N}\\s+${kw}`, "i"),                            // "3 saignee"
+    new RegExp(`${kw}\\s+(?:de\\s+|sur\\s+)?${N}\\s*${U}`, "i"), // "saignee de 10 metres"
+  ];
+  for (const re of pats) { const m = txt.match(re); if (m) return motToInt(m[1].toLowerCase()); }
+  return 1;
+}
+if (typeof window !== "undefined") { window.contientMot = contientMot; window.extraireNombre = extraireNombre; }
 
 /** Compte les portes / boiseries citées (fenêtres et volets ont leurs propres prestations). */
 function compterBoiseries(txt) {
@@ -119,7 +137,7 @@ function parserDevis(texteBrut, { estimerSurfaceMurs, ligneDevis }) {
   // 2) Appliquer les règles mots-clés
   const dejaAjoute = new Set();
   for (const regle of REGLES) {
-    const match = regle.cles.some((k) => txt.includes(k.normalize("NFD").replace(/[̀-ͯ]/g, "")));
+    const match = regle.cles.some((k) => contientMot(txt, k));
     if (!match) continue;
 
     if (regle.action === "detecte_papier") {
@@ -164,12 +182,16 @@ function parserDevis(texteBrut, { estimerSurfaceMurs, ligneDevis }) {
       case "traitement_humidite":
       case "decollage_papier":
       case "pose_toile_verre":
-      // Surfaces spécifiques chiffrées au m² (façade, sol, patine) — repli sur surface murs.
-      case "peinture_facade":
-      case "peinture_sol_resine":
+      // Patine / béton ciré déco : le plus souvent sur les murs → surface murs.
       case "patine_beton_cire":
         quantite = surfaceMurs || 0;
         if (!surfaceMurs) besoinPrecision.push(`Quelle surface pour « ${CATALOGUE_LABEL(regle.action)} » ?`);
+        break;
+      // Sol & façade = surface RÉELLE dictée (au sol / de façade), jamais l'estimation des murs (×2).
+      case "peinture_sol_resine":
+      case "peinture_facade":
+        quantite = surfaceSol || 0;
+        if (!surfaceSol) besoinPrecision.push(`Quelle surface pour « ${CATALOGUE_LABEL(regle.action)} » ?`);
         break;
       case "peinture_plafond":
       case "prepa_ratissage_plafond":

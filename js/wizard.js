@@ -139,6 +139,17 @@
         '<div class="pv-line" style="opacity:.55"><span>Sous-total HT</span><span>1 415,00 &euro;</span></div>' +
         '<div class="pv-line" style="opacity:.55"><span>TVA 10 %</span><span>141,50 &euro;</span></div>' +
         '<div class="pv-ttc"><span>Total TTC</span><span class="v">1 556,50 &euro;</span></div>',
+      couverture:
+        '<div class="pv-grp">Toiture</div>' +
+        '<div class="pv-line"><span>D&eacute;pose couverture existante</span><span>1 760,00 &euro;</span></div>' +
+        '<div class="pv-line"><span>Couverture tuiles (80 m&sup2;)</span><span>4 000,00 &euro;</span></div>' +
+        '<div class="pv-grp">Zinguerie &amp; acc&egrave;s</div>' +
+        '<div class="pv-line"><span>Pose goutti&egrave;res</span><span>420,00 &euro;</span></div>' +
+        '<div class="pv-line"><span>&Eacute;chafaudage</span><span>600,00 &euro;</span></div>' +
+        '<div class="pv-line"><span>D&eacute;moussage &amp; hydrofuge</span><span>1 200,00 &euro;</span></div>' +
+        '<div class="pv-line" style="opacity:.55"><span>Sous-total HT</span><span>7 980,00 &euro;</span></div>' +
+        '<div class="pv-line" style="opacity:.55"><span>TVA 10 %</span><span>798,00 &euro;</span></div>' +
+        '<div class="pv-ttc"><span>Total TTC</span><span class="v">8 778,00 &euro;</span></div>',
     };
     function demoKey() {
       const m = data.metiers;

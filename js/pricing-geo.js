@@ -20,7 +20,8 @@
   // Code postal → coefficient de zone.
   function coefZoneFromCP(cp) {
     if (!cp) return 1.00;
-    cp = String(cp).replace(/\s/g, "");
+    cp = String(cp).replace(/\D/g, "");
+    if (cp.length === 4) cp = "0" + cp; // dépt 01-09 saisi sans le zéro ("6000" → "06000")
     let dep = cp.slice(0, 2);
     if (dep === "20") dep = (parseInt(cp.slice(0, 3), 10) < 202) ? "2A" : "2B"; // Corse
     const c = COEF[dep];

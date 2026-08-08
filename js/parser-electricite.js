@@ -75,7 +75,7 @@
     var deja = {};
 
     REGLES_ELEC.forEach(function (r) {
-      var match = r.cles.some(function (k) { return txt.indexOf(k.normalize("NFD").replace(/[̀-ͯ]/g, "")) !== -1; });
+      var match = r.cles.some(function (k) { return window.contientMot ? window.contientMot(txt, k) : txt.indexOf(k.normalize("NFD").replace(/[̀-ͯ]/g, "")) !== -1; });
       if (!match) return;
       if (deja[r.action]) return;
       deja[r.action] = true;
