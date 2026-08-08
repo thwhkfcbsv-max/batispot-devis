@@ -1,5 +1,6 @@
-/* Service worker minimal — cache app shell pour usage hors-ligne (chantier sans réseau). */
-const CACHE = "devix-v22";
+/* Service worker — RÉSEAU D'ABORD (fini le "vieille version en cache").
+   On sert toujours le frais quand il y a du réseau ; le cache ne sert QUE de repli hors-ligne. */
+const CACHE = "devix-v23";
 const ASSETS = [
   "index.html",
   "css/app.css",
@@ -19,27 +20,28 @@ self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
 self.addEventListener("activate", (e) => {
-  e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
+  e.waitUntil(caches.keys()
+    .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+    .then(() => self.clients.claim()));
 });
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
-  // Navigation (ouverture de l'URL nue /devis/ hors-ligne) → sert index.html en cache.
-  if (e.request.mode === "navigate") {
-    e.respondWith(caches.match("index.html").then((r) => r || fetch(e.request)));
-    return;
-  }
+  let url;
+  try { url = new URL(e.request.url); } catch (_) { return; }
+  if (url.origin !== self.location.origin) return; // tiers (Supabase, etc.) → réseau direct
+
+  // RÉSEAU D'ABORD : on tente toujours le frais, on rafraîchit le cache, repli cache si hors-ligne.
   e.respondWith(
-    caches.match(e.request).then((cached) => cached || fetch(e.request).then((res) => {
-      // Ne mettre en cache runtime QUE le même-origine et les réponses OK (évite l'empoisonnement
-      // persistant d'une ressource tierce/opaque).
-      try {
-        const url = new URL(e.request.url);
-        if (url.origin === self.location.origin && res.ok && res.type === "basic") {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
-        }
-      } catch (_) {}
+    fetch(e.request).then((res) => {
+      if (res && res.ok && res.type === "basic") {
+        const copy = res.clone();
+        caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+      }
       return res;
-    }).catch(() => cached))
+    }).catch(() =>
+      caches.match(e.request).then((r) =>
+        r || (e.request.mode === "navigate" ? caches.match("index.html") : Response.error())
+      )
+    )
   );
 });
