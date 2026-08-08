@@ -60,7 +60,7 @@
     let step = 0;
     const steps = document.querySelectorAll(".wz-step");
     const dots = document.querySelectorAll(".wz-progress .dot");
-    const data = { nom: "", contact: "", tel: "", email: "", siret: "", couleur: "#0F5132", logo: "" };
+    const data = { nom: "", contact: "", tel: "", email: "", siret: "", couleur: "#0F5132", logo: "", metier: "peinture" };
 
     // Swatches
     const sw = $("swatches");
@@ -92,6 +92,47 @@
     // Champs entreprise
     const bind = (id, key) => $(id).addEventListener("input", (e) => { data[key] = e.target.value; refreshPreview(); });
     bind("wzNom", "nom"); bind("wzContact", "contact"); bind("wzTel", "tel"); bind("wzEmail", "email"); bind("wzSiret", "siret");
+
+    // ---- Choix du métier (écran d'accueil) : bascule catalogue/parser (via profil) + démo ----
+    const DEMO = {
+      peinture:
+        '<div class="pv-line"><span>Peinture murs (2 couches)</span><span>812,00 &euro;</span></div>' +
+        '<div class="pv-line"><span>Peinture plafond (2 couches)</span><span>384,00 &euro;</span></div>' +
+        '<div class="pv-line"><span>Rebouchage &amp; pr&eacute;paration</span><span>180,00 &euro;</span></div>' +
+        '<div class="pv-line"><span>Sous-couche d\'accrochage</span><span>203,00 &euro;</span></div>' +
+        '<div class="pv-line"><span>Protection &amp; installation</span><span>80,00 &euro;</span></div>' +
+        '<div class="pv-line" style="opacity:.55"><span>Sous-total HT</span><span>1 659,00 &euro;</span></div>' +
+        '<div class="pv-line" style="opacity:.55"><span>TVA 10 %</span><span>165,90 &euro;</span></div>' +
+        '<div class="pv-ttc"><span>Total TTC</span><span class="v">1 824,90 &euro;</span></div>',
+      plomberie:
+        '<div class="pv-line"><span>Pose douche + receveur</span><span>250,00 &euro;</span></div>' +
+        '<div class="pv-line"><span>Mitigeur thermostatique</span><span>280,00 &euro;</span></div>' +
+        '<div class="pv-line"><span>Pose WC</span><span>180,00 &euro;</span></div>' +
+        '<div class="pv-line"><span>D&eacute;pose ancien appareil</span><span>60,00 &euro;</span></div>' +
+        '<div class="pv-line"><span>D&eacute;placement</span><span>45,00 &euro;</span></div>' +
+        '<div class="pv-line" style="opacity:.55"><span>Sous-total HT</span><span>815,00 &euro;</span></div>' +
+        '<div class="pv-line" style="opacity:.55"><span>TVA 10 %</span><span>81,50 &euro;</span></div>' +
+        '<div class="pv-ttc"><span>Total TTC</span><span class="v">896,50 &euro;</span></div>',
+    };
+    function renderDemo() {
+      const el = $("pvLines1");
+      if (el) el.innerHTML = DEMO[data.metier] || DEMO.peinture;
+      const sub = document.querySelector("#wzPreview1 .pv-sub");
+      if (sub) sub.textContent = data.metier === "plomberie" ? "Devis plomberie" : "Devis DEV-0001";
+    }
+    const metierBtns = document.querySelectorAll(".wz-metier-btn");
+    function markMetier() {
+      metierBtns.forEach((b) => {
+        const on = b.dataset.m === data.metier;
+        b.style.background = on ? "#1A6B45" : "#fff";
+        b.style.color = on ? "#fff" : "#1C2B22";
+        b.style.borderColor = on ? "#1A6B45" : "#CBD5D0";
+      });
+    }
+    metierBtns.forEach((b) => b.addEventListener("click", () => {
+      data.metier = b.dataset.m; markMetier(); renderDemo();
+    }));
+    markMetier(); renderDemo();
 
     // Logo upload
     $("wzLogoBtn").addEventListener("click", () => $("wzLogoFile").click());
@@ -130,7 +171,7 @@
     // « Essayer d'abord » : saute le wizard, on demandera les infos au 1er export.
     const btnSkip = $("wzSkip");
     if (btnSkip) btnSkip.addEventListener("click", () => {
-      store.profil = { nom: "", couleur: data.couleur || "#1A6B45" };
+      store.profil = { nom: "", couleur: data.couleur || "#1A6B45", metier: data.metier };
       store.onboarded = true;
       window.setBrand(data.couleur || "#1A6B45");
       wiz.classList.remove("open");
@@ -139,7 +180,7 @@
     });
 
     function finish() {
-      const profil = { nom: data.nom, contact: data.contact, tel: data.tel, email: data.email, siret: data.siret, adresse: data.adresse || "", forme: data.forme || "", couleur: data.couleur, logo: data.logo, decennale: data.decennale || "" };
+      const profil = { nom: data.nom, contact: data.contact, tel: data.tel, email: data.email, siret: data.siret, adresse: data.adresse || "", forme: data.forme || "", couleur: data.couleur, logo: data.logo, decennale: data.decennale || "", metier: data.metier };
       // Écriture tolérante au quota localStorage (logo lourd sur Safari mobile) — bug M4.
       try {
         store.profil = profil;
